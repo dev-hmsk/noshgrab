@@ -20,6 +20,7 @@ class Square:
         # print(catalog_dict)
         # for loop collects data from location object
         for location in locations.body['locations']:
+            print(location)
             location_id = location['id']
             merchant_id = location['merchant_id']
             location_name = location['name']
@@ -50,10 +51,9 @@ class Square:
         return locations_list
     
     def get_category_id(self):
-        category = self.get_catalog(types='CATEGORY')
+        result = self.get_catalog(types='CATEGORY')
         catalog_dict = {}
-
-        for i in category.body['objects']:
+        for i in result.body['objects']:
             category_id = i['id']
             category_id_paired_name = i['category_data']['name']
             catalog_dict[category_id_paired_name] = category_id
@@ -61,8 +61,12 @@ class Square:
         return catalog_dict
         
     def get_catalog(self, types=None):
-        catalog = self.client.catalog.list_catalog(types=types)
-        return catalog
+        result = self.client.catalog.list_catalog(types=types)
+        if result.is_success():
+            print(result.body)
+        elif result.is_error():
+            print(result.errors)
+        return result
     
     def get_items(self):
         catalog = self.get_catalog()

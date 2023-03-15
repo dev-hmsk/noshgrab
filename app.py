@@ -2,7 +2,7 @@ from api.square_interface import Square
 import os
 
 interface = Square()
-interface.connect(os.environ['TOKEN'], environment='production')
+interface.connect(os.environ['TOKEN'], environment='sandbox')
 locations = interface.get_locations()
 
 
