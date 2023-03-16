@@ -75,7 +75,9 @@ class Item:
                  ):
         self.item_id = item_id
         self.item_name = item_name
+        # make below a subclass
         self.item_variation = item_variation
+        # this should be in subclass as well
         self.price = item_price
         pass
 

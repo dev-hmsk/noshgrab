@@ -114,26 +114,80 @@ class Square:
             #print(result.errors)
 
         for item in result.body['objects']:
-            # print(item)
-            basest_item_id = item['id']
-            print('this is the unifying id of the base item')
-            print(f'basest item id: {basest_item_id}')
 
-            # we might want location available in item
-            # locations_available = item['present_at_location_ids']
-            # print(locations_available)
+            base_item_id = item['id']
+            print(" ")
+            print('this is the unifying id of the base item and is shared across variations')
+            print(f'base item id: {base_item_id}')
+            base_item_data = item['item_data']
+            base_item_name = base_item_data['name']
 
-            basest_item_data = item['item_data']
-            basest_item_name = basest_item_data['name']
-            print(f'basest item name: {basest_item_name}')
-            print(f'basest item data: {basest_item_data}')
-            basest_item_variation_collection = basest_item_data['variations']
-            #print(f'item variation data: {basest_item_variation_collection}')
-            basest_item_variation_type = basest_item_variation_collection[0]
-            #print(basest_item_variation_type)
-            variation_type_data_collection = basest_item_variation_type['item_variation_data']
-            #print(variation_type_data_collection)
+            print(f'base item name: {base_item_name}')
+            #print(f'base item data: {base_item_data}')
+            base_item_variation_collection = base_item_data['variations']
+
+            # pass into subclass
+            base_variation_data = base_item_variation_collection[0]
+            #print(base_variation_data)
+            # print('data ok')
+            base_variation_name = base_item_name + " - " + base_variation_data['type']
+            print(f'base variant name: {base_variation_name}')
+            base_variation_id = base_variation_data['id']
+            print(f'base variation id: {base_variation_id}')
+
+            # below is stored as boolean value (True/False).
+            # AAAL = Available at all locations
+
+            base_variation_AAAL = base_variation_data['present_at_all_locations']
+            print(f'boolean value of availability: {base_variation_AAAL}')
+
+            if base_variation_AAAL == True:
+                base_variation_A = None
+                base_variation_NA = None
+                print("available everywhere")
+            else:
+                # A = Available
+                base_variation_A = base_variation_data['present_at_location_ids']
+                print(f'available locations: {base_variation_A}')
+                # NA = Not Available
+                base_variation_NA = base_variation_data['absent_at_location_ids']
+                print(f'not present at locations: {base_variation_NA}')
+
+            print(" ")
+
+            length_of_list = len(base_item_variation_collection)
+            
+            '''
+
+            for item in list, go through list and do something
+            track how many items are in the list and do it for each item 
+            using index location.
+
+            we have length of list, so now we need to track how we iterate through it
+            and make sure it does so correctly until it terminates at the last item
+            so we don't run into going into an out of bounds index
+
+
+            '''
+            range_of_list = range(length_of_list)
+            #print(range_of_list)
+
+            for index_location in range(length_of_list):
+                
+                variation_data = self.interate_through_list(index_location, base_item_variation_collection)
+                print(f'test{variation_data}')
+                print(type(variation_data))
+
+
         return result
 
-    def get_orders():
+    def get_orders(self):
         pass
+
+    def interate_through_list(self, index_location, base_item_variation_collection):
+
+        variation_index = base_item_variation_collection[index_location]
+
+        
+        
+        return variation_index
