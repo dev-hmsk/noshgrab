@@ -3,8 +3,13 @@ import os
 
 interface = Square()
 interface.connect(os.environ['TOKEN'], environment='sandbox')
-locations = interface.get_locations()
 
+# Test for location and address object
+# locations = interface.get_locations()
+# for location in locations:
+#     print(repr(location))
 
-for location in locations:
-    print(repr(location))
+# Test for Item object
+items = interface.get_items()
+# for item in items:
+#     print(item["ITEM"])

@@ -37,7 +37,33 @@ class Address:
 
 
 class Order:
-    pass
+
+    def __init__(self,
+                 order_id=None,
+                 location_id=None,
+                 state_enum=None,
+                 subtotal=None,
+                 taxes=None,
+                 service_fee=None,
+                 credit_fee=None,
+                 date=None, # should be in DateTime format
+                 items=None # should be using the Item()
+                 ):
+        self.order_id = order_id
+        self.location_id = location_id
+        self.state_enum = state_enum
+        self.subtotal = subtotal
+        self.taxes = taxes
+        self.service_fee = service_fee
+        self.credit_fee = credit_fee
+        self.date = date
+        
+        self.items = Item(
+                 item_id=None,
+                 item_name=None,
+                 item_variation=None,
+                 item_price=None)
+        pass
 
 
 class Item:
@@ -45,9 +71,17 @@ class Item:
                  item_id=None,
                  item_name=None,
                  item_variation=None,
-                 item_price=None):
+                 item_price=None
+                 ):
         self.item_id = item_id
         self.item_name = item_name
         self.item_variation = item_variation
         self.price = item_price
+        pass
+
+
+class ItemVariation:
+    def __init__(self):
+        
+        pass
     pass

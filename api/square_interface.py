@@ -17,10 +17,10 @@ class Square:
         locations = self.client.locations.list_locations()
         locations_list = []
         catalog_dict = self.get_category_id()
-        # print(catalog_dict)
+        #print(catalog_dict)
         # for loop collects data from location object
         for location in locations.body['locations']:
-            print(location)
+            # print(location)
             location_id = location['id']
             merchant_id = location['merchant_id']
             location_name = location['name']
@@ -47,7 +47,6 @@ class Square:
             locations_list.append(Location(location_id, merchant_id,
                                            category_id, location_name,
                                            location_email, address_object))
-
         return locations_list
     
     def get_category_id(self):
@@ -63,14 +62,78 @@ class Square:
     def get_catalog(self, types=None):
         result = self.client.catalog.list_catalog(types=types)
         if result.is_success():
-            print(result.body)
+            print("Catalog List Success")
+            #print(result.body)
         elif result.is_error():
-            print(result.errors)
+            print("Catalog List Failure")
+            #print(result.errors)
         return result
     
     def get_items(self):
-        catalog = self.get_catalog()
-        pass
+        """
+        This should populate the database with an update list of items 
+        within the API.
+        OPTION 1:
+        It seems that the Basest Item contains the Category_id, 
+        while the variation of the Basest item contains the location_id.
+        Categories do not respect location (i.e. they do not care which location)
+        as they are set to present_at_all_locations=True.
+
+        Category_ID can be utilized as addtional identifier to better
+        seperate sellable items within stores. This is because item_variations
+        track location_ids.
+        This means Category_ID's could delinetate between types of goods
+        within a single store front, and still retain the specificty
+        to only be sellable at certain locations
+        (granted by the nested location_id present within each item_variation)
+        
+        OPTION 2:
+        by using:
+        client.catalog.list_catalog(types = "Item")
+        we can completely bypass category_id + structure and directly
+        acess the items themselves. This new basest type ("Item")
+        contains within it the type "Item_variation". the basest item_id is given 
+        first and then shared within "Item_variation" as "item_id", there is then
+        futher specificity given by "item_option_value_id" after passing item_variation_data 
+        (which contains its own unique item_id)
+
+        This means that Ciabatta Bread is given id = xxxx and Ciabatta Bread small 
+        is also given item_id = xxxx PLUS item_option_id
+        
+
+        
+        """
+
+        result = self.get_catalog(types='ITEM')
+
+        if result.is_success():
+            print("Get_item() Success")
+            #print(result.body)
+        elif result.is_error():
+            print("Failure")
+            #print(result.errors)
+
+        for item in result.body['objects']:
+            # print(item)
+            basest_item_id = item['id']
+            print('this is the unifying id of the base item')
+            print(f'basest item id: {basest_item_id}')
+
+            # we might want location available in item
+            # locations_available = item['present_at_location_ids']
+            # print(locations_available)
+
+            basest_item_data = item['item_data']
+            basest_item_name = basest_item_data['name']
+            print(f'basest item name: {basest_item_name}')
+            print(f'basest item data: {basest_item_data}')
+            basest_item_variation_collection = basest_item_data['variations']
+            #print(f'item variation data: {basest_item_variation_collection}')
+            basest_item_variation_type = basest_item_variation_collection[0]
+            #print(basest_item_variation_type)
+            variation_type_data_collection = basest_item_variation_type['item_variation_data']
+            #print(variation_type_data_collection)
+        return result
 
     def get_orders():
         pass
