@@ -79,9 +79,12 @@ class Item:
         self.item_variation = item_variation
         # this should be in subclass as well
         self.price = item_price
+
+    def get_price(self):
+        #this will look in subclass ItemVariation and pull the price
         pass
 
-
+# sub class of Item()
 class ItemVariation:
     def __init__(self):
         

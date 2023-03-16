@@ -114,6 +114,7 @@ class Square:
             #print(result.errors)
 
         for item in result.body['objects']:
+            print(item)
 
             base_item_id = item['id']
             print(" ")
@@ -155,8 +156,6 @@ class Square:
 
             print(" ")
 
-            length_of_list = len(base_item_variation_collection)
-            
             '''
 
             for item in list, go through list and do something
@@ -169,9 +168,8 @@ class Square:
 
 
             '''
-            range_of_list = range(length_of_list)
-            #print(range_of_list)
 
+            length_of_list = len(base_item_variation_collection)
             for index_location in range(length_of_list):
                 
                 variation_data = self.interate_through_list(index_location, base_item_variation_collection)
@@ -187,7 +185,5 @@ class Square:
     def interate_through_list(self, index_location, base_item_variation_collection):
 
         variation_index = base_item_variation_collection[index_location]
-
-        
         
         return variation_index
