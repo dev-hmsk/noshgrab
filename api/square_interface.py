@@ -68,70 +68,67 @@ class Square:
 
         if result.is_success():
             print("Get_item() Success")
-            #print(result.body)
         elif result.is_error():
             print("Failure")
-            #print(result.errors)
 
         for item in result.body['objects']:
-            #print(item)
-
             base_item_id = item['id']
-            print(" ")
-            print('this is the unifying id of the base item and is shared across variations')
-            print(f'base item id: {base_item_id}')
             base_item_data = item['item_data']
             base_item_name = base_item_data['name']
-
-            print(f'base item name: {base_item_name}')
-            #print(f'base item data: {base_item_data}')
             base_item_variation_collection = base_item_data['variations']
-            #print(base_item_variation_collection)
-            # pass into subclass
+
+            # pass into ItemVariation()
             base_variation_data = base_item_variation_collection[0]
-            #print(base_variation_data)
-            # print('data ok')
             base_variation_name = base_item_name + " - " + base_variation_data['type']
-            #print(f'base variant name: {base_variation_name}')
+
             base_variation_id = base_variation_data['id']
-            #print(f'base variation id: {base_variation_id}')
-
-            # below is stored as boolean value (True/False).
-            # AAAL = Available at all locations
-
+            '''
+           
+            AAAL = Available at all locations <- this is given as boolean value
+            We can possible put the following location_id in both the
+            Item() and ItemVariation().
+            This may give us more options when parsing Orders() 
+            to determine where the orders are ocming from 
+            and subseqently where to send the buisness emails.
+            '''
             base_variation_AAAL = base_variation_data['present_at_all_locations']
-            #print(f'boolean value of availability: {base_variation_AAAL}')
-            
             if base_variation_AAAL == True:
                 base_variation_A = None
                 base_variation_NA = None
-                #print("available everywhere")
+
             else:
                 # A = Available
                 base_variation_A = base_variation_data['present_at_location_ids']
-                #print(f'available locations: {base_variation_A}')
                 # NA = Not Available
                 base_variation_NA = base_variation_data['absent_at_location_ids']
-                #print(f'not present at locations: {base_variation_NA}')
 
+            '''
+            Below is the ability to interate through a list 
+            and based on how many item variations we have
+            we can append each item variation as a seperate
+            entity on the variation_list.
+            This can then be passed into the ItemVariation()
+            which in turn is passed into the Item() class 
+            '''
             length_of_list = len(base_item_variation_collection)
-            #this still contains the base variation and the sublist of variation_data
             variation_list =[]
             for index_location in range(length_of_list):
                 
-                variation_data = self.interate_through_list(index_location, 
+                variation_data = self.interate_through_list(index_location,
                                                             base_item_variation_collection)
                 variation_list.append(variation_data)
             
-            variation_object = ItemVariation(base_variation_name, variation_list)
+            variation_object = ItemVariation(base_variation_name,
+                                             variation_list)
             item_object = Item(base_item_id, base_item_name, variation_object)
 
             print(item_object.item_variation)
+            
         return result
 
     def get_orders(self):
         '''
-        # orders are given with the catalog_object_id which is == the basest item_variation , id. 
+        # orders are given with the catalog_object_id which is == the basest item_variation id. 
         i.e. the first one that appears when looking at item variations. the next indentifier
         is variation_name which == 'name' within item_variation_data. Price of the item variation
         is given by 'price_money' and is stored by lowest currency. for USD this is == to cents.
@@ -149,19 +146,20 @@ class Square:
                                                                          "LD5F95G2D0Q5W",
                                                                          "L9F5S9KFEAECZ"]})
 
-
         orders = result.body['orders']
         length_of_orders = (len(orders))
         list_of_orders = []
         for index_location in range(length_of_orders):
-            #print(orders[index_location])
             list_of_orders.append(orders[index_location])
         print(list_of_orders)
         return list_of_orders
 
-    def interate_through_list(self, index_location, base_item_variation_collection):
+    def interate_through_list(self, index_location, 
+                              base_item_variation_collection):
 
         variation_index = base_item_variation_collection[index_location]
         
         return variation_index
+    
+    
 
