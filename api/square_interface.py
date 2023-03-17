@@ -1,5 +1,5 @@
 from square.client import Client
-from database.model import Location, Address
+from database.model import Location, Address, Item, ItemVariation
 # import os
 
 
@@ -70,39 +70,6 @@ class Square:
         return result
     
     def get_items(self):
-        """
-        This should populate the database with an update list of items 
-        within the API.
-        OPTION 1:
-        It seems that the Basest Item contains the Category_id, 
-        while the variation of the Basest item contains the location_id.
-        Categories do not respect location (i.e. they do not care which location)
-        as they are set to present_at_all_locations=True.
-
-        Category_ID can be utilized as addtional identifier to better
-        seperate sellable items within stores. This is because item_variations
-        track location_ids.
-        This means Category_ID's could delinetate between types of goods
-        within a single store front, and still retain the specificty
-        to only be sellable at certain locations
-        (granted by the nested location_id present within each item_variation)
-        
-        OPTION 2:
-        by using:
-        client.catalog.list_catalog(types = "Item")
-        we can completely bypass category_id + structure and directly
-        acess the items themselves. This new basest type ("Item")
-        contains within it the type "Item_variation". the basest item_id is given 
-        first and then shared within "Item_variation" as "item_id", there is then
-        futher specificity given by "item_option_value_id" after passing item_variation_data 
-        (which contains its own unique item_id)
-
-        This means that Ciabatta Bread is given id = xxxx and Ciabatta Bread small 
-        is also given item_id = xxxx PLUS item_option_id
-        
-
-        
-        """
 
         result = self.get_catalog(types='ITEM')
 
@@ -114,7 +81,7 @@ class Square:
             #print(result.errors)
 
         for item in result.body['objects']:
-            print(item)
+            #print(item)
 
             base_item_id = item['id']
             print(" ")
@@ -126,57 +93,47 @@ class Square:
             print(f'base item name: {base_item_name}')
             #print(f'base item data: {base_item_data}')
             base_item_variation_collection = base_item_data['variations']
-
+            #print(base_item_variation_collection)
             # pass into subclass
             base_variation_data = base_item_variation_collection[0]
             #print(base_variation_data)
             # print('data ok')
             base_variation_name = base_item_name + " - " + base_variation_data['type']
-            print(f'base variant name: {base_variation_name}')
+            #print(f'base variant name: {base_variation_name}')
             base_variation_id = base_variation_data['id']
-            print(f'base variation id: {base_variation_id}')
+            #print(f'base variation id: {base_variation_id}')
 
             # below is stored as boolean value (True/False).
             # AAAL = Available at all locations
 
             base_variation_AAAL = base_variation_data['present_at_all_locations']
-            print(f'boolean value of availability: {base_variation_AAAL}')
+            #print(f'boolean value of availability: {base_variation_AAAL}')
 
             if base_variation_AAAL == True:
                 base_variation_A = None
                 base_variation_NA = None
-                print("available everywhere")
+                #print("available everywhere")
             else:
                 # A = Available
                 base_variation_A = base_variation_data['present_at_location_ids']
-                print(f'available locations: {base_variation_A}')
+                #print(f'available locations: {base_variation_A}')
                 # NA = Not Available
                 base_variation_NA = base_variation_data['absent_at_location_ids']
-                print(f'not present at locations: {base_variation_NA}')
-
-            print(" ")
-
-            '''
-
-            for item in list, go through list and do something
-            track how many items are in the list and do it for each item 
-            using index location.
-
-            we have length of list, so now we need to track how we iterate through it
-            and make sure it does so correctly until it terminates at the last item
-            so we don't run into going into an out of bounds index
-
-
-            '''
+                #print(f'not present at locations: {base_variation_NA}')
 
             length_of_list = len(base_item_variation_collection)
+            #this still contains the base variation and the sublist of variation_data
+            variation_list =[]
             for index_location in range(length_of_list):
                 
-                variation_data = self.interate_through_list(index_location, base_item_variation_collection)
-                print(f'test{variation_data}')
-                print(type(variation_data))
+                variation_data = self.interate_through_list(index_location, 
+                                                            base_item_variation_collection)
+                variation_list.append(variation_data)
+            
+            variation_object = ItemVariation(base_variation_name, variation_list)
+            item_object = Item(base_item_id, base_item_name, variation_object)
 
-
+            print(item_object.item_variation)
         return result
 
     def get_orders(self):
@@ -187,3 +144,4 @@ class Square:
         variation_index = base_item_variation_collection[index_location]
         
         return variation_index
+

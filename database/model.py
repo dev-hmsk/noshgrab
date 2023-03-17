@@ -81,12 +81,21 @@ class Item:
         self.price = item_price
 
     def get_price(self):
-        #this will look in subclass ItemVariation and pull the price
+        #this will look in class ItemVariation and pull the price
         pass
 
-# sub class of Item()
+
 class ItemVariation:
-    def __init__(self):
+    #stores every possible item variation as a list
+    def __init__(self,
+                 variation_item_name,
+                 variation_list):
+        self.variation_name = variation_item_name
+        self.variation_data = variation_list
         
-        pass
+    def __repr__(self):
+        info = (f'ItemVariation(): {self.variation_data} \n Variation Name: {self.variation_name}')
+        return info
+    
+
     pass
