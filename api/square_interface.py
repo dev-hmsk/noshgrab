@@ -24,13 +24,6 @@ class Square:
             location_id = location['id']
             merchant_id = location['merchant_id']
             location_name = location['name']
-            """
-            currently the name "CHRIS'S hot chicken is mispelled
-            to "chis's hot chicken" which
-            causes the below key verification to not correctly
-            apply the category_id to the correct category
-            specific: name in catalog api != name  in location api
-            """
             category_id = catalog_dict.get(location_name)
 
             location_email = location['business_email']
@@ -108,7 +101,7 @@ class Square:
 
             base_variation_AAAL = base_variation_data['present_at_all_locations']
             #print(f'boolean value of availability: {base_variation_AAAL}')
-
+            
             if base_variation_AAAL == True:
                 base_variation_A = None
                 base_variation_NA = None
@@ -137,7 +130,34 @@ class Square:
         return result
 
     def get_orders(self):
-        pass
+        '''
+        # orders are given with the catalog_object_id which is == the basest item_variation , id. 
+        i.e. the first one that appears when looking at item variations. the next indentifier
+        is variation_name which == 'name' within item_variation_data. Price of the item variation
+        is given by 'price_money' and is stored by lowest currency. for USD this is == to cents.
+        SO 5 dollars is represented as 500 cents.
+
+        location_id is given within tenders[]
+
+        its possible we can use this to determine buisness email of the location and send email
+        by parsing it into get_locations() or novel funciton.
+
+        Currently we must specify locations (at least one) during the below .search_orders()
+        '''
+        result = self.client.orders.search_orders(body={"location_ids": ["LCT2A6T5GMYK0",
+                                                                         "LX75PZ5WEVCGG",
+                                                                         "LD5F95G2D0Q5W",
+                                                                         "L9F5S9KFEAECZ"]})
+
+
+        orders = result.body['orders']
+        length_of_orders = (len(orders))
+        list_of_orders = []
+        for index_location in range(length_of_orders):
+            #print(orders[index_location])
+            list_of_orders.append(orders[index_location])
+        print(list_of_orders)
+        return list_of_orders
 
     def interate_through_list(self, index_location, base_item_variation_collection):
 

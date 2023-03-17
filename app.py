@@ -10,6 +10,10 @@ interface.connect(os.environ['TOKEN'], environment='sandbox')
 #     print(repr(location))
 
 # Test for Item object
-items = interface.get_items()
+#items = interface.get_items()
 # for item in items:
 #     print(item["ITEM"])
+
+#test for retrieve orders
+
+orders = interface.get_orders()
