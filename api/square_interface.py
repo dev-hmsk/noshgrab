@@ -34,7 +34,7 @@ class Square:
             location_postal = address_info['postal_code']
             location_country = address_info['country']
 
-            address_object = Address(location_address, location_locality,
+            address_object = Address(location_id, location_address, location_locality,
                                      location_state, location_postal,
                                      location_country)
             locations_list.append(Location(location_id, merchant_id,
@@ -70,63 +70,78 @@ class Square:
             print("Get_item() Success")
         elif result.is_error():
             print("Failure")
+        item_object_list = []
+        #below result_dict turns Square API into dict class
+        result_dict = result.body
+        #objects is now list
+        objects_list = result_dict.get('objects')
+        # print(f'type check {type(objects_list)}')
+
 
         for item in result.body['objects']:
+            #print(item)
             base_item_id = item['id']
+            #print(f'base item id: {base_item_id}')
             base_item_data = item['item_data']
+            # print(f'item data: \n {base_item_data}')
             base_item_name = base_item_data['name']
+            #print(f'item name {base_item_name}')
             base_item_variation_collection = base_item_data['variations']
-
-            # pass into ItemVariation()
-            base_variation_data = base_item_variation_collection[0]
-            base_variation_name = base_item_name + " - " + base_variation_data['type']
-
-            base_variation_id = base_variation_data['id']
-            '''
-           
-            AAAL = Available at all locations <- this is given as boolean value
-            We can possible put the following location_id in both the
-            Item() and ItemVariation().
-            This may give us more options when parsing Orders() 
-            to determine where the orders are ocming from 
-            and subseqently where to send the buisness emails.
-            '''
-            base_variation_AAAL = base_variation_data['present_at_all_locations']
-            if base_variation_AAAL == True:
-                base_variation_A = None
-                base_variation_NA = None
-
-            else:
-                # A = Available
-                base_variation_A = base_variation_data['present_at_location_ids']
-                # NA = Not Available
-                base_variation_NA = base_variation_data['absent_at_location_ids']
-
-            '''
-            Below is the ability to interate through a list 
-            and based on how many item variations we have
-            we can append each item variation as a seperate
-            entity on the variation_list.
-            This can then be passed into the ItemVariation()
-            which in turn is passed into the Item() class 
-            '''
-            length_of_list = len(base_item_variation_collection)
-            variation_list =[]
-            for index_location in range(length_of_list):
+            #print(f'base item variation:\n{base_item_variation_collection}')
+            
+            for item in base_item_variation_collection:
+                #print(f'new item \n {item}')
+                item_variation_data = item['item_variation_data']
+                #print(f'item variation data: \n {item_variation_data}')
+                item_variation_name = item_variation_data['name']
+                #print(f'Item Variation Name:\n{item_variation_name}')
+                item_option_values = item_variation_data.get('item_option_values')
                 
-                variation_data = self.interate_through_list(index_location,
-                                                            base_item_variation_collection)
-                variation_list.append(variation_data)
-            
-            variation_object = ItemVariation(base_variation_name,
-                                             variation_list)
-            item_object = Item(base_item_id, base_item_name, variation_object)
+                #Calculate Item Variation Price
+                if item_variation_data.get('price_money'):
+                    item_variation_price = item_variation_data['price_money']['amount']
+                    item_variation_currency_type = item_variation_data['price_money']['currency']
+                    #print(f'price money: {item_variation_price}')
+                    #print(item_variation_currency_type)
+                
+                if isinstance(item_option_values, list):
+                    #print(f'item option values: \n{item_option_values}')
+                    #print(f'item option id \n  {item_option_id}')
+                    item_option_id = item_option_values[0]['item_option_id']
+                    item_option_value_id = item_option_values[0]['item_option_value_id']
+                    #print(f'item option id:\n{item_option_id}')
+                    #print(f'item option value id:\n{item_option_value_id}')
+                
 
-            print(item_object.item_variation)
+                   
+                
+                #print(item_variation_name)
+                #variation_name = base_item_name + " - " + base_variation_data['type']
+                #print(f'variant name: {variation_name}')
             
-        return result
+                base_variation_AAAL = item['present_at_all_locations']
+                
+                if base_variation_AAAL == True:
+                    base_variation_A = None
+                    base_variation_NA = None
+
+                else:
+                    # A = Available
+                    base_variation_A = item['present_at_location_ids']
+                    # print(base_variation_A)
+                    # NA = Not Available
+                    base_variation_NA = item['absent_at_location_ids']
+                    # print(base_variation_NA)
+                
+                item_object = Item(base_item_id, base_item_name, item_variation_name, item_variation_price)
+                
+                item_object_list.append(item_object)
+
+            #print(item_object)  
+        return item_object_list
 
     def get_orders(self):
+
         '''
         # orders are given with the catalog_object_id which is == the basest item_variation id. 
         i.e. the first one that appears when looking at item variations. the next indentifier
@@ -160,6 +175,3 @@ class Square:
         variation_index = base_item_variation_collection[index_location]
         
         return variation_index
-    
-    
-

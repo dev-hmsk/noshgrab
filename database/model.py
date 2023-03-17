@@ -19,12 +19,14 @@ class Location:
 
 
 class Address:
-    def __init__(self,
+    def __init__(self, 
+                 location_id=None,
                  addressline1=None,
                  locality=None,
                  state=None,
                  postal=None,
                  country=None):
+        self.id = location_id
         self.address = addressline1
         self.locality = locality
         self.state = state
@@ -32,12 +34,11 @@ class Address:
         self.country = country
     
     def __repr__(self):
-        info = (f'Physical Address: {self.address} \n Locality: {self.locality} \n State: {self.state} \n Postal: {self.postal} \n Country: {self.country}')
+        info = (f'Paired Location ID: {self.id} \n Physical Address: {self.address} \n Locality: {self.locality} \n State: {self.state} \n Postal: {self.postal} \n Country: {self.country}')
         return info
 
 
 class Order:
-
     def __init__(self,
                  order_id=None,
                  location_id=None,
@@ -46,8 +47,8 @@ class Order:
                  taxes=None,
                  service_fee=None,
                  credit_fee=None,
-                 date=None, # should be in DateTime format
-                 items=None # should be using the Item()
+                 date=None,
+                 items=None
                  ):
         self.order_id = order_id
         self.location_id = location_id
@@ -80,9 +81,12 @@ class Item:
         # this should be in subclass as well
         self.price = item_price
 
+    def __repr__(self):
+        info = (f'Item_ID: {self.item_id}\n Item_Name: {self.item_name}\n Item_Variation: {self.item_variation}\n Item_Variation_price: {self.price}\n')
+        return info    
+
     def get_price(self):
-        #this will look in class ItemVariation and pull the price
-        pass
+        return self.price
 
 
 class ItemVariation:

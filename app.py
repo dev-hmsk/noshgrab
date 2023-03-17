@@ -21,17 +21,16 @@ and Address()
 
 # locations = interface.get_locations()
 # for location in locations:
-#     print(repr(location))
+#     print(location)
 
 '''
-Test Cdde to use get_items()
+Test Code to use get_items()
 This should create both the Item() and ItemVariation()
 '''
-#items = interface.get_items()
-# for item in items:
-#     print(item["ITEM"])
+# items = interface.get_items()
+# print(items)
 
 '''
 Test Code to use get_orders
 '''
-#orders = interface.get_orders()
+orders = interface.get_orders()
