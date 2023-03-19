@@ -58,16 +58,12 @@ class Order:
         self.service_fee = service_fee
         self.credit_fee = credit_fee
         self.date = date
-        self.items = Item(
-                 item_id=None,
-                 item_name=None,
-                 item_variation=None,
-                 item_price=None)
+        self.items = items
                 
     def __repr__(self):
-        info1 = (f'\norder id: {self.order_id}\nlocation id: {self.location_id}\nstate_enum = {self.state_enum}\n')
-        info2 = (f'sub total: {self.subtotal}\ntaxes: {self.taxes}\nservice fee: {self.service_fee}\ncredit fee: {self.service_fee}')
-        info3 = (f'credit fee: {self.credit_fee}\ndate: {self.date}\nitems: {self.items}')
+        info1 = (f'\norder id: {self.order_id}\nlocation id: {self.location_id}\nstate_enum = {self.state_enum}')
+        info2 = (f'\nsub total: {self.subtotal}\ntaxes: {self.taxes}\nservice fee: {self.service_fee}\ncredit fee: {self.service_fee}')
+        info3 = (f'\ncredit fee: {self.credit_fee}\ndate: {self.date}\nitems: {self.items}')
         info4 = info1 + info2 + info3
         return info4
     

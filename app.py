@@ -33,5 +33,5 @@ This should create both the Item() and ItemVariation()
 '''
 Test Code to use get_orders
 '''
-orders = interface.get_orders()
-print(repr(orders))
+# orders = interface.get_orders()
+# print(repr(orders))

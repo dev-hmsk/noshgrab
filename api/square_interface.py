@@ -85,8 +85,8 @@ class Square:
                 #Calculate Item Variation Price
                 if item_variation_data.get('price_money'):
                     item_variation_price = item_variation_data['price_money']['amount']
+                    # uncomment below if you require distinction of currency type
                     # item_variation_currency_type = item_variation_data['price_money']['currency']
-
                 '''
                 if item option value becomes relevant you can uncomment the below code
                 '''
@@ -114,48 +114,60 @@ class Square:
 
     def get_orders(self):
 
-        result = self.client.orders.search_orders(body={"location_ids": ["LCT2A6T5GMYK0",
-                                                                         "LX75PZ5WEVCGG",
-                                                                         "LD5F95G2D0Q5W",
-                                                                         "L9F5S9KFEAECZ"]})
+        result = self.client.orders.search_orders(body={
+                                                    "location_ids": [
+                                                    "LX75PZ5WEVCGG",
+                                                    "LD5F95G2D0Q5W",
+                                                    "L9F5S9KFEAECZ",
+                                                    "LCT2A6T5GMYK0"
+                                                    ],
+                                                    "query": {
+                                                    "filter": {
+                                                        "state_filter": {
+                                                        "states": [
+                                                            "OPEN"
+                                                        ]
+                                                        }
+                                                    }
+                                                    }
+                                                }
+                                                )
 
         orders_body = result.body
-        # print(type(orders_body))
-        # print(orders_body)
         orders = orders_body['orders']
         order_object_list = []
-        for items in orders:
-            #print(items)
-            order_id = items['id']
-            location_id = items['location_id']
-            state_enum = items['state']
+        for order in orders:
 
-            order_taxes = items['net_amounts']['tax_money']['amount']
-            order_service_fee = items['net_amounts']['service_charge_money']['amount']
-            order_tip = items['net_amounts']['tip_money']['amount']
-            order_discount = items['net_amounts']['discount_money']['amount']
-            order_total = items['net_amounts']['total_money']['amount']
+            order_id = order['id']
+            location_id = order['location_id']
+            state_enum = order['state']
+            order_taxes = order['net_amounts']['tax_money']['amount']
+            order_service_fee = order['net_amounts']['service_charge_money']['amount']
+            order_tip = order['net_amounts']['tip_money']['amount']
+            order_discount = order['net_amounts']['discount_money']['amount']
+            order_total = order['net_amounts']['total_money']['amount']
             '''
             to calculate sub total we add discount and subtract all other
             fees/taxes from order_total to give resultant sub total
              '''
             order_sub_total = (order_total + order_discount) - (order_taxes + order_service_fee + order_tip)
-            order_date = items['created_at']
+            order_date = order['created_at']
             credit_fee = 0
-
+            line_items = order.get('line_items')
+            item_object_list = []
+            if line_items:
+                for item in line_items:
+                    item_id = item['catalog_object_id']
+                    item_name = item['name'] 
+                    item_variation = item['variation_name']
+                    item_price = item['base_price_money']['amount']
+                    item_object = Item(item_id, item_name, item_variation, item_price)
+                    item_object_list.append(item_object)
             order_object = Order(order_id, location_id,
                                  state_enum,
                                  order_sub_total, order_taxes,
                                  order_service_fee, credit_fee,
-                                 order_date, items)
-            #print(order_object)
+                                 order_date, item_object_list)
+         
             order_object_list.append(order_object)
         return order_object_list
-
-
-            
-            
-            
-            
-            
-            # subtotal = 
