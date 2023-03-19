@@ -43,12 +43,12 @@ class Order:
                  order_id=None,
                  location_id=None,
                  state_enum=None,
-                 subtotal=None,
-                 taxes=None,
-                 service_fee=None,
-                 credit_fee=None,
+                 subtotal=0,
+                 taxes=0,
+                 service_fee=0,
+                 credit_fee=0,
                  date=None,
-                 items=None
+                 items=None,
                  ):
         self.order_id = order_id
         self.location_id = location_id
@@ -58,13 +58,20 @@ class Order:
         self.service_fee = service_fee
         self.credit_fee = credit_fee
         self.date = date
-        
         self.items = Item(
                  item_id=None,
                  item_name=None,
                  item_variation=None,
                  item_price=None)
-        pass
+                
+    def __repr__(self):
+        info1 = (f'\norder id: {self.order_id}\nlocation id: {self.location_id}\nstate_enum = {self.state_enum}\n')
+        info2 = (f'sub total: {self.subtotal}\ntaxes: {self.taxes}\nservice fee: {self.service_fee}\ncredit fee: {self.service_fee}')
+        info3 = (f'credit fee: {self.credit_fee}\ndate: {self.date}\nitems: {self.items}')
+        info4 = info1 + info2 + info3
+        return info4
+    
+        
 
 
 class Item:
@@ -76,27 +83,13 @@ class Item:
                  ):
         self.item_id = item_id
         self.item_name = item_name
-        # make below a subclass
         self.item_variation = item_variation
-        # this should be in subclass as well
         self.price = item_price
 
     def __repr__(self):
-        info = (f'Item_ID: {self.item_id}\n Item_Name: {self.item_name}\n Item_Variation: {self.item_variation}\n Item_Variation_price: {self.price}\n')
+        info = (f'\n Item_ID: {self.item_id}\n Item_Name: {self.item_name}\n Item_Variation: {self.item_variation}\n Item_Variation_price: {self.price}\n')
         return info    
 
     def get_price(self):
         return self.price
 
-
-class ItemVariation:
-    #stores every possible item variation as a list
-    def __init__(self,
-                 variation_item_name,
-                 variation_list):
-        self.variation_name = variation_item_name
-        self.variation_data = variation_list
-        
-    def __repr__(self):
-        info = (f'ItemVariation(): {self.variation_data} \n Variation Name: {self.variation_name}')
-        return info
