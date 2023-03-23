@@ -1,9 +1,9 @@
 from square.client import Client
-from database.model import Location, Address, Item, Order
+from database.model import Account,Item, Order
 # import os
 
 
-class Square:
+class SquareInterface:
     def __init__(self):
         self.client = None
         self.map = None
@@ -12,10 +12,10 @@ class Square:
         self.client = Client(
             access_token=token,
             environment=environment)
-   
-    def get_locations(self):
+
+    def get_account(self):
         locations = self.client.locations.list_locations()
-        locations_list = []
+        account_list = []
         catalog_dict = self.get_category_id()
 
         for location in locations.body['locations']:
@@ -32,34 +32,14 @@ class Square:
             location_postal = address_info['postal_code']
             location_country = address_info['country']
 
-            address_object = Address(location_id, location_address,
-                                     location_locality, location_state,
-                                     location_postal, location_country)
-            locations_list.append(Location(location_id, merchant_id,
+            account_list.append(Account(location_id, merchant_id,
                                            category_id, location_name,
-                                           location_email, address_object))
-        return locations_list
-    
-    def get_category_id(self):
-        result = self.get_catalog(types='CATEGORY')
-        catalog_dict = {}
-        for i in result.body['objects']:
-            category_id = i['id']
-            category_id_paired_name = i['category_data']['name']
-            catalog_dict[category_id_paired_name] = category_id
+                                           location_email,
+                                           location_address, location_locality,
+                                           location_state, location_postal, 
+                                           location_country))
+        return account_list
 
-        return catalog_dict
-        
-    def get_catalog(self, types=None):
-        result = self.client.catalog.list_catalog(types=types)
-        if result.is_success():
-            print("Catalog List Success")
-
-        elif result.is_error():
-            print("Catalog List Failure")
-
-        return result
-    
     def get_items(self):
 
         result = self.get_catalog(types='ITEM')
@@ -113,14 +93,9 @@ class Square:
         return item_object_list
 
     def get_orders(self):
-
+        location_ids = self.get_location_ids()
         result = self.client.orders.search_orders(body={
-                                                    "location_ids": [
-                                                    "LX75PZ5WEVCGG",
-                                                    "LD5F95G2D0Q5W",
-                                                    "L9F5S9KFEAECZ",
-                                                    "LCT2A6T5GMYK0"
-                                                    ],
+                                                    "location_ids":location_ids,
                                                     "query": {
                                                     "filter": {
                                                         "state_filter": {
@@ -171,3 +146,45 @@ class Square:
          
             order_object_list.append(order_object)
         return order_object_list
+
+    def get_location_ids(self):
+        '''
+        this will fetch all possible locations 
+        in Square API to pass into get_accounts()
+        '''
+        result = self.client.locations.list_locations()
+
+        # if result.is_success():
+        #     print(result.body)
+        # elif result.is_error():
+        #     print(result.errors)
+        locations_body = result.body
+        locations = locations_body['locations']
+        location_ids = []
+
+        for location in locations:
+            location_id = location['id']
+            location_ids.append(location_id)
+        # print(location_ids)
+
+        return location_ids
+
+    def get_category_id(self):
+        result = self.get_catalog(types='CATEGORY')
+        catalog_dict = {}
+        for i in result.body['objects']:
+            category_id = i['id']
+            category_id_paired_name = i['category_data']['name']
+            catalog_dict[category_id_paired_name] = category_id
+
+        return catalog_dict
+
+    def get_catalog(self, types=None):
+        result = self.client.catalog.list_catalog(types=types)
+        if result.is_success():
+            print("Catalog List Success")
+
+        elif result.is_error():
+            print("Catalog List Failure")
+
+        return result

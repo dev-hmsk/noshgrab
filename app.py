@@ -1,4 +1,4 @@
-from api.square_interface import Square
+from api.square_interface import SquareInterface
 import os
 
 '''
@@ -9,19 +9,18 @@ Next step is to abstract by one layer and have Square()
 call functions from SquareObjectMapper() instead.
 
 '''
-interface = Square()
+interface = SquareInterface()
 interface.connect(os.environ['TOKEN'], environment='sandbox')
 
 '''
-Test for location and address object.
-This should print all the information stored in Location()
-and Address()
+Test for account object
+should print all attributes contained within instance
 
 '''
 
-# locations = interface.get_locations()
-# for location in locations:
-#     print(location)
+# accounts = interface.get_account()
+# for account in accounts:
+#     print(account)
 
 '''
 Test Code to use get_items()
@@ -35,3 +34,10 @@ Test Code to use get_orders
 '''
 # orders = interface.get_orders()
 # print(repr(orders))
+
+'''
+test code for get_locations
+
+'''
+
+# locations = interface.get_locations()
