@@ -60,18 +60,20 @@ class Order:
 class Item:
     def __init__(self,
                  item_id=None,
-                 item_name=None,
-                 item_variation=None,
+                 variant_item_location_id=None,
+                 item_variation_name=None,
                  item_price=None
                  ):
         self.item_id = item_id
-        self.item_name = item_name
-        self.item_variation = item_variation
+        self.variant_item_location_id = variant_item_location_id
+        self.item_variation_name = item_variation_name
         self.price = item_price
 
     def __repr__(self):
-        info = (f'\n Item_ID: {self.item_id}\n Item_Name: {self.item_name}\n Item_Variation: {self.item_variation}\n Item_Variation_price: {self.price}\n')
-        return info    
+        info1 = (f'\nItem_ID: {self.item_id}\nItem_Location_ID {self.variant_item_location_id}')
+        info2 = (f'\nItem_Variation Name: {self.item_variation_name}\nItem_Variation_price: {self.price}\n')
+        info3 = info1 + info2
+        return info3    
 
     def get_price(self):
         return self.price

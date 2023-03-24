@@ -1,6 +1,6 @@
 from square.client import Client
-from database.model import Account,Item, Order
-# import os
+from database.model import Account, Item, Order
+
 
 
 class SquareInterface:
@@ -93,20 +93,10 @@ class SquareInterface:
         return item_object_list
 
     def get_orders(self):
-        location_ids = self.get_location_ids()
-        result = self.client.orders.search_orders(body={
-                                                    "location_ids":location_ids,
-                                                    "query": {
-                                                    "filter": {
-                                                        "state_filter": {
-                                                        "states": [
-                                                            "OPEN"
-                                                        ]
-                                                        }
-                                                    }
-                                                    }
-                                                }
-                                                )
+        # location_ids = self.get_location_ids()
+
+        result = self.client.orders.search_orders(body = {"location_ids": ["LX75PZ5WEVCGG"],"query": {"filter": {}}})
+
 
         orders_body = result.body
         orders = orders_body['orders']
@@ -134,9 +124,10 @@ class SquareInterface:
                 for item in line_items:
                     item_id = item['catalog_object_id']
                     item_name = item['name'] 
-                    item_variation = item['variation_name']
+                    item_variation = item_name + " " + item['variation_name']
+                    variant_item_location_id = self.retrieve_lineitem_location(item_id)
                     item_price = item['base_price_money']['amount']
-                    item_object = Item(item_id, item_name, item_variation, item_price)
+                    item_object = Item(item_id, variant_item_location_id, item_variation, item_price)
                     item_object_list.append(item_object)
             order_object = Order(order_id, location_id,
                                  state_enum,
@@ -151,6 +142,8 @@ class SquareInterface:
         '''
         this will fetch all possible locations 
         in Square API to pass into get_accounts()
+        Currently Unused. But keep in case 
+        we change from hardcoding location_id
         '''
         result = self.client.locations.list_locations()
 
@@ -188,3 +181,14 @@ class SquareInterface:
             print("Catalog List Failure")
 
         return result
+
+    def retrieve_lineitem_location(self, lineitem_id):
+        result = self.client.catalog.retrieve_catalog_object(
+                                    object_id=lineitem_id,
+                                    include_related_objects=False)
+
+        accounts = result.body['object']['present_at_location_ids']
+        for account in accounts:
+            # currently hard code NOSHGRAB TEST ACCOUNT ID to select non nosh id and return
+            if account != "LCT2A6T5GMYK0":
+                return account
