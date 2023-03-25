@@ -1,19 +1,19 @@
 class Account:
-    def __init__(self, location_id=None,
+    def __init__(self, account_id=None,
                  merchant_id=None,
                  category_id=None,
-                 location_name=None,
-                 location_email=None,
+                 account_name=None,
+                 account_email=None,
                  addressline1=None,
                  locality=None,
                  state=None,
                  postal=None,
                  country=None):
-        self.location_id = location_id
+        self.account_id = account_id
         self.merchant_id = merchant_id
         self.category_id = category_id
-        self.name = location_name
-        self.email = location_email
+        self.name = account_name
+        self.email = account_email
         self.address = addressline1
         self.locality = locality
         self.state = state
@@ -21,7 +21,7 @@ class Account:
         self.country = country
 
     def __repr__(self):
-        info1 = (f'Name: {self.name} \n Location id: {self.location_id} \n Merchant id: {self.merchant_id} \n Category id: {self.category_id} \n email: {self.email}')
+        info1 = (f'Name: {self.name} \n Account id: {self.account_id} \n Merchant id: {self.merchant_id} \n Category id: {self.category_id} \n email: {self.email}')
         info2 = (f'\n Physical Address: {self.address} \n Locality: {self.locality} \n State: {self.state} \n Postal: {self.postal} \n Country: {self.country}')
         info3 = info1 + info2
         return info3
@@ -29,8 +29,8 @@ class Account:
 
 class Order:
     def __init__(self,
-                 order_id=None,
-                 location_id=None,
+                 order_id,
+                 account_id,
                  state_enum=None,
                  subtotal=0,
                  taxes=0,
@@ -40,7 +40,7 @@ class Order:
                  items=None,
                  ):
         self.order_id = order_id
-        self.location_id = location_id
+        self.account_id = account_id
         self.state_enum = state_enum
         self.subtotal = subtotal
         self.taxes = taxes
@@ -50,7 +50,7 @@ class Order:
         self.items = items
                 
     def __repr__(self):
-        info1 = (f'\norder id: {self.order_id}\nlocation id: {self.location_id}\nstate_enum = {self.state_enum}')
+        info1 = (f'\norder id: {self.order_id}\naccount id: {self.account_id}\nstate_enum = {self.state_enum}')
         info2 = (f'\nsub total: {self.subtotal}\ntaxes: {self.taxes}\nservice fee: {self.service_fee}\ncredit fee: {self.service_fee}')
         info3 = (f'\ncredit fee: {self.credit_fee}\ndate: {self.date}\nitems: {self.items}')
         info4 = info1 + info2 + info3
@@ -59,22 +59,21 @@ class Order:
 
 class Item:
     def __init__(self,
-                 item_id=None,
-                 variant_item_location_id=None,
-                 item_variation_name=None,
-                 item_price=None
+                 item_id,
+                 item_variation_name,
+                 item_price,
+                 variant_item_account_id=None
                  ):
         self.item_id = item_id
-        self.variant_item_location_id = variant_item_location_id
+        self.variant_item_account_id = variant_item_account_id
         self.item_variation_name = item_variation_name
         self.price = item_price
 
     def __repr__(self):
-        info1 = (f'\nItem_ID: {self.item_id}\nItem_Location_ID {self.variant_item_location_id}')
+        info1 = (f'\nItem_ID: {self.item_id}\nItem_account_ID: {self.variant_item_account_id}')
         info2 = (f'\nItem_Variation Name: {self.item_variation_name}\nItem_Variation_price: {self.price}\n')
         info3 = info1 + info2
         return info3    
 
     def get_price(self):
         return self.price
-
