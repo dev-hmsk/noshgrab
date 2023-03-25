@@ -103,7 +103,6 @@ class Square:
         return item_object_list
 
     def get_orders(self):
-        # account_ids = self.get_account_ids()
         result = self.client.orders.search_orders(body = {"location_ids": ["LX75PZ5WEVCGG"],"query": {"filter": {}}})
 
         if result.is_error():
@@ -207,7 +206,5 @@ class Square:
             return None
         
         accounts = result.body['object']['present_at_location_ids']
-        for account in accounts:
-            # currently hard code NOSHGRAB TEST ACCOUNT ID to select non nosh id and return
-            if account != "LCT2A6T5GMYK0":
-                return account
+        accounts.remove("LCT2A6T5GMYK0")
+        return accounts[0]

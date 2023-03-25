@@ -1,18 +1,23 @@
----
-Pro_:
-  Db_name : "Production_Db"
-  Db_user : "God"
-  Db_dialect : "English"
-  Db_ip : 123.12
-  Db_port : 4010
+default: &default
+  database:
+    dialect: postgresql+psycopg2
+    name: noshgrab
+    user: ng_admin
+    ip: 172.17.0.2
+    port: 5432
+  square:
+    environment: sandbox
 
-Devel_:
-  Db_name : "Development_Db"
-  Db_user : "Jesus"
-  Db_dialect : "Spanish"
-  Db_ip : 543.32
-  Db_port : 0203
+PRODUCTION:
+  square:
+    environment: production
+  <<: *default
 
+DEVELOPMENT:
+  <<: *default
+
+TEST:
+  <<: *default
 
 
 

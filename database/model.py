@@ -78,7 +78,7 @@ class Item(db.Model):
 
     items: orm.Mapped["OrderedItem"] = orm.relationship(back_populates="item")
 
-    def __init__(self, item_id, account_id, item_name, item_price):
+    def __init__(self, item_id, item_name, item_price, account_id):
         self.id = item_id
         self.account_id = account_id
         self.name = item_name

@@ -7,9 +7,7 @@ class Config:
 
         with open('config/config.yml', 'r') as f:
             file = yaml.safe_load(f)
-        if type == 'Production':
-            self.info = file['Pro_']
-        else:
-            self.info = file['Devel_']
+        self.info = file[type]
 
-CONFIG = Config(os.environ['ENVIROMENT'])
+
+CONFIG = Config(os.environ['ENVIRONMENT'])
