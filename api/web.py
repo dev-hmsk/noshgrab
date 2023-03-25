@@ -1,8 +1,7 @@
 from square.client import Client
 from database.model import Account, Item, Order
 
-
-class SquareInterface:
+class Square:
     def __init__(self):
         self.client = None
         self.map = None
