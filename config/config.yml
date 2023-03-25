@@ -1,0 +1,18 @@
+---
+Pro_:
+  Db_name : "Production_Db"
+  Db_user : "God"
+  Db_dialect : "English"
+  Db_ip : 123.12
+  Db_port : 4010
+
+Devel_:
+  Db_name : "Development_Db"
+  Db_user : "Jesus"
+  Db_dialect : "Spanish"
+  Db_ip : 543.32
+  Db_port : 0203
+
+
+
+
