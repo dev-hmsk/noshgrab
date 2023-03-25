@@ -1,4 +1,5 @@
 from api.square_interface import SquareInterface
+from config.config import CONFIG
 import os
 
 '''
@@ -11,7 +12,6 @@ call functions from SquareObjectMapper() instead.
 '''
 interface = SquareInterface()
 interface.connect(os.environ['TOKEN'], environment='sandbox')
-
 '''
 Test for account object
 should print all attributes contained within instance

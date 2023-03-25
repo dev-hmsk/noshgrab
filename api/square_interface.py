@@ -1,5 +1,6 @@
 from square.client import Client
 from database.model import Account, Item, Order
+from config.config import CONFIG
 
 
 class SquareInterface:
