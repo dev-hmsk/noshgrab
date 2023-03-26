@@ -1,0 +1,10 @@
+FROM postgres
+
+ARG postgres_pwd
+
+RUN mkdir -p /var/lib/postgresql-static/data
+
+ENV PGDATA /var/lib/postgresql-static/data
+ENV POSTGRES_PASSWORD $postgres_pwd
+ENV POSTGRES_DB noshgrab
+ENV POSTGRES_USER ng_admin

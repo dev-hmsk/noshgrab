@@ -1,0 +1,23 @@
+default: &default
+  database:
+    dialect: postgresql+psycopg2
+    name: noshgrab
+    user: ng_admin
+    ip: 172.17.0.2
+    port: 5432
+  square:
+    environment: sandbox
+
+PRODUCTION:
+  square:
+    environment: production
+  <<: *default
+
+DEVELOPMENT:
+  <<: *default
+
+TEST:
+  <<: *default
+
+
+

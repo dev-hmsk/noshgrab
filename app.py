@@ -1,36 +1,25 @@
-from api.square_interface import SquareInterface
+from api.web import Square
+from database.model import db
+from flask import Flask
+from database.managers import NoshGrab
+from api.web import Square
+from config.config import CONFIG
+from database.model import AccountType
 import os
 
-'''
+app = Flask(__name__)
 
-This creates a test object of Square().
-Currently all funcitonality resides within Square().
-Next step is to abstract by one layer and have Square()
-call functions from SquareObjectMapper() instead.
+db_config = CONFIG.info['database']
+app.config['SQLALCHEMY_DATABASE_URI'] = f'{db_config["dialect"]}://{db_config["user"]}:{os.environ["DB_PASS"]}@{db_config["ip"]}:{db_config["port"]}/{db_config["name"]}'
 
-'''
-interface = SquareInterface()
-interface.connect(os.environ['TOKEN'], environment='sandbox')
+db.init_app(app)
 
-'''
-Test for account object
-should print all attributes contained within instance
+def main():
+    web_s = Square()
+    database = NoshGrab(db)
+    web_s.connect(os.environ['TOKEN'], environment=CONFIG.info['square']['environment'])
+    orders = web_s.get_orders()
 
-'''
-
-# accounts = interface.get_account()
-# for account in accounts:
-#     print(account)
-
-'''
-Test Code to use get_items()
-This should create both the Item() and ItemVariation()
-'''
-# items = interface.get_items()
-# print(items)
-
-'''
-Test Code to use get_orders
-'''
-# orders = interface.get_orders()
-# print(repr(orders))
+if __name__ == "__main__": 
+    with app.app_context():
+        main()
