@@ -30,13 +30,13 @@ class Account(db.Model):
     postal: orm.Mapped[str]
     country: orm.Mapped[str] = orm.mapped_column(String(5))
 
-    def __init__(self, account_id, merchant_id=None, type=AccountType.MERCHANT, location_name=None, location_email=None,
+    def __init__(self, account_id, merchant_id=None, type=AccountType.MERCHANT, name=None, email=None,
                  addressline1=None, locality=None, state=None, postal=None, country=None):
         self.id = account_id
         self.merchant_id = merchant_id
         self.type = type
-        self.name = location_name
-        self.email = location_email
+        self.name = name
+        self.email = email
         self.address = addressline1
         self.locality = locality
         self.state = state
