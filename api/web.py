@@ -1,6 +1,7 @@
 from square.client import Client
 from database.model import Account, Item, Order
 from config.config import CONFIG
+from database.model import OrderState
 
 class Square:
     def __init__(self):
@@ -12,23 +13,15 @@ class Square:
             access_token=token,
             environment=environment)
 
-    def get_account(self):
+    def get_accounts(self):
         result = self.client.locations.list_locations()
         account_list = []
-        catalog_dict = self.get_category_id()
 
         if result.is_error():
             print(result.errors)
             return None
         
-        accounts = result.body
-        for account in accounts['locations']:
-            account_id = account['id']
-            merchant_id = account['merchant_id']
-            account_name = account['name']
-            category_id = catalog_dict.get(account_name)
-
-            account_email = account['business_email']
+        for account in result.body['locations']:
             address_info = account['address']
             account_address = address_info['address_line_1']
             account_locality = address_info['locality']
@@ -36,12 +29,8 @@ class Square:
             account_postal = address_info['postal_code']
             account_country = address_info['country']
 
-            account_list.append(Account(account_id, merchant_id,
-                                        category_id, account_name,
-                                        account_email,
-                                        account_address, account_locality,
-                                        account_state, account_postal, 
-                                        account_country))
+            account_list.append(Account(account['id'], account['merchant_id'], account['name'], account['business_email'],
+                                        account_address, account_locality, account_state, account_postal, account_country))
         return account_list
 
     def get_items(self):
@@ -55,7 +44,6 @@ class Square:
         item_object_list = []
 
         for item in result.body['objects']:
-            base_item_id = item['id']
             base_item_data = item['item_data']
             base_item_name = base_item_data['name']
             base_item_variation_collection = base_item_data['variations']
@@ -63,6 +51,7 @@ class Square:
             for item in base_item_variation_collection:
                 item_variation_data = item['item_variation_data']
                 items_variation_id = item['id']
+                item_version = item['version']
                 item_variation_name = item_variation_data['name']
                 item_full_name = base_item_name + " " + item_variation_name
                 item_option_values = item_variation_data.get('item_option_values')
@@ -94,29 +83,31 @@ class Square:
                     # NA = Not Available
                     base_variation_NA = item['absent_at_location_ids']
                 
-                item_object = Item(items_variation_id, item_full_name,
-                                   item_variation_price,
-                                   variant_item_account_id)
+                item_object = Item(items_variation_id, item_version, item_full_name,
+                                   item_variation_price, variant_item_account_id)
                 
                 item_object_list.append(item_object)
 
         return item_object_list
 
     def get_orders(self):
-        result = self.client.orders.search_orders(body = {"location_ids": ["LX75PZ5WEVCGG"],"query": {"filter": {}}})
+        # We will query for orders from Web API based on the main account id set in config.yml
+        result = self.client.orders.search_orders(body = {"location_ids": [CONFIG.info['account']['id']],"query": {"filter": {}}})
 
         if result.is_error():
             print(result.errors)
             return None
         
-        orders_body = result.body
-        orders = orders_body['orders']
+        orders = result.body['orders']
         order_object_list = []
-        for order in orders:
 
+        for order in orders:
             order_id = order['id']
             account_id = order['location_id']
-            state_enum = order['state']
+
+            # Order state is set as an Enum. So we have to convert to Enum here
+            state_enum = OrderState(order['state'])
+            
             order_taxes = order['net_amounts']['tax_money']['amount']
             order_service_fee = order['net_amounts']['service_charge_money']['amount']
             order_tip = order['net_amounts']['tip_money']['amount']
@@ -132,22 +123,23 @@ class Square:
             credit_fee = 0
             line_items = order.get('line_items')
             item_object_list = []
+
             if line_items:
                 for item in line_items:
                     item_id = item['catalog_object_id']
+                    item_version = item['catalog_version']
                     item_name = item['name'] 
                     item_variation = item_name + " " + item['variation_name']
                     variant_item_account_id = self.retrieve_lineitem_account(item_id)
                     item_price = item['base_price_money']['amount']
-                    item_object = Item(item_id, item_variation,
+                    item_object = Item(item_id, item_version, item_variation,
                                        item_price, variant_item_account_id)
+                    
                     item_object_list.append(item_object)
 
-            order_object = Order(order_id, account_id,
-                                 state_enum,
-                                 order_sub_total, order_taxes,
-                                 order_service_fee, credit_fee,
-                                 order_date, item_object_list)
+            order_object = Order(order_id, account_id, state_enum, order_sub_total, order_taxes,
+                                 order_service_fee, credit_fee, order_date, item_object_list)
+            
             order_object_list.append(order_object)
 
         return order_object_list
@@ -182,6 +174,7 @@ class Square:
             return None
         
         catalog_dict = {}
+
         for i in result.body['objects']:
             category_id = i['id']
             category_id_paired_name = i['category_data']['name']
@@ -204,7 +197,13 @@ class Square:
         if result.is_error():
             print(result.errors)
             return None
-        
+
         accounts = result.body['object']['present_at_location_ids']
-        accounts.remove("LCT2A6T5GMYK0")
+
+        ''' We assume that every item is set to be present_at for two accounts (Locations).
+            1. The main account
+            2. The account that is actually serving the item
+            Therefore by removing the main account from this list. We can assume the item belongs to the remaining account (Location)
+        '''
+        accounts.remove(CONFIG.info['account']['id'])
         return accounts[0]

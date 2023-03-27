@@ -4,7 +4,6 @@ from flask import Flask
 from database.managers import NoshGrab
 from api.web import Square
 from config.config import CONFIG
-from database.model import AccountType
 import os
 
 app = Flask(__name__)
@@ -19,6 +18,13 @@ def main():
     database = NoshGrab(db)
     web_s.connect(os.environ['TOKEN'], environment=CONFIG.info['square']['environment'])
     orders = web_s.get_orders()
+
+    db_orders = database.get.orders()
+
+    # Check for every order from Square. Check if order is in the database list of orders from database.get.orders()
+    for order in orders:
+        if order not in db_orders:
+            print(order.id)
 
 if __name__ == "__main__": 
     with app.app_context():
