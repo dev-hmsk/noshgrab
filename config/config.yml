@@ -1,12 +1,21 @@
 default: &default
+
+  # Database configurations
   database:
     dialect: postgresql+psycopg2
     name: noshgrab
     user: ng_admin
     ip: 172.17.0.2
     port: 5432
+  
+  # Square API Configurations
   square:
     environment: sandbox
+  
+  # Main account used to query orders and perform various other tasks
+  account:
+    name: 'Noshgrab-Development'
+    id: 'LCT2A6T5GMYK0'
 
 PRODUCTION:
   square:
