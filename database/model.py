@@ -6,7 +6,9 @@ from sqlalchemy import ForeignKey
 from sqlalchemy import String, TIMESTAMP, Integer, BigInteger
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import ForeignKeyConstraint
-from abc import ABC, abstractmethod
+from functools import wraps
+
+from config.config import CONFIG
 
 db = SQLAlchemy()
 
@@ -14,6 +16,10 @@ class OrderState(enum.Enum):
     OPEN = "OPEN"
     COMPLETED = "COMPLETED"
     CANCELED = "CANCELED"
+
+class DateConversion(Exception):
+    def __init__(self, message):
+        super().__init__(message)
 
 '''
 We abstract this model so all the table objects can share useful methods
@@ -33,6 +39,18 @@ class AbstractModel(db.Model):
             if not attr.startswith('_'):
                 updated_value = getattr(updated_object, attr)
                 setattr(self, attr, updated_value)
+
+    def _date_setter():
+        def decorator(func):
+            @wraps(func)
+            def wrapper(self, date):
+                try:
+                    date_str = '%Y-%m-%dT%H:%M:%S.%fz'
+                    func(self, datetime.datetime.strptime(date, date_str).date())
+                except ValueError as e:
+                    raise DateConversion(f'Failed to convert {date} to format: {date_str}')
+            return wrapper
+        return decorator
 
 class Account(AbstractModel):
     __tablename__ = "account"
@@ -60,7 +78,7 @@ class Account(AbstractModel):
 
 class Order(AbstractModel):
     __tablename__ = "order"
-    id = orm.mapped_column(String(30), primary_key=True)
+    id = orm.mapped_column(String(50), primary_key=True)
     parent_id = orm.Mapped[str]
     account_id: orm.Mapped[str]
     state: orm.Mapped[OrderState]
@@ -68,12 +86,13 @@ class Order(AbstractModel):
     taxes: orm.Mapped[float]
     service_fee: orm.Mapped[Optional[float]]
     credit_fee: orm.Mapped[Optional[float]]
-    created_at: orm.Mapped[datetime.datetime]
+    _created_at: orm.Mapped[datetime.datetime] = orm.mapped_column('created_at')
+    _updated_at: orm.Mapped[datetime.datetime] = orm.mapped_column('updated_at')
 
     orders: orm.Mapped["OrderedItem"] = orm.relationship(back_populates="order")
 
     def __init__(self, order_id, account_id, state=None, subtotal=0, taxes=0,
-                 service_fee=0, credit_fee=0, created_at=None, items=None, parent_id=None):
+                 service_fee=0, created_at=None, updated_at=None, items=None, parent_id=None):
         self.id = order_id
         self.parent_id = parent_id
         self.account_id = account_id
@@ -81,9 +100,28 @@ class Order(AbstractModel):
         self.subtotal = subtotal
         self.taxes = taxes
         self.service_fee = service_fee
-        self.credit_fee = credit_fee
+        self.credit_fee = (subtotal + taxes) * CONFIG.info['invoice_percentage']['credit_fee']
         self.created_at = created_at
+        self.updated_at = updated_at
         self.items = items
+    
+    @property
+    def created_at(self):
+        return self._created_at
+
+    @created_at.setter
+    @AbstractModel._date_setter()
+    def created_at(self, date):
+        self._created_at = date
+
+    @property
+    def updated_at(self):
+        return self._updated_at
+    
+    @updated_at.setter
+    @AbstractModel._date_setter()
+    def updated_at(self, date):
+        self._updated_at = date
 
 class Item(AbstractModel):
     __tablename__ = "item"

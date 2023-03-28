@@ -120,7 +120,7 @@ class Square:
             order_sub_total = (order_total + order_discount) - (order_taxes + order_service_fee + order_tip)
 
             order_date = order['created_at']
-            credit_fee = 0
+            updated_at = order['updated_at']
             line_items = order.get('line_items')
             item_object_list = []
 
@@ -129,16 +129,16 @@ class Square:
                     item_id = item['catalog_object_id']
                     item_version = item['catalog_version']
                     item_name = item['name'] 
+                    item_quantity = int(item['quantity'])
                     item_variation = item_name + " " + item['variation_name']
                     variant_item_account_id = self.retrieve_lineitem_account(item_id)
                     item_price = item['base_price_money']['amount']
-                    item_object = Item(item_id, item_version, item_variation,
-                                       item_price, variant_item_account_id)
-                    
-                    item_object_list.append(item_object)
+                    for i in range(item_quantity):
+                        item_object_list.append(Item(item_id, item_version, item_variation,
+                                item_price, variant_item_account_id))
 
             order_object = Order(order_id, account_id, state_enum, order_sub_total, order_taxes,
-                                 order_service_fee, credit_fee, order_date, item_object_list)
+                                 order_service_fee, order_date, updated_at, item_object_list)
             
             order_object_list.append(order_object)
 

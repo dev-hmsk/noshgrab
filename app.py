@@ -4,6 +4,7 @@ from flask import Flask
 from database.managers import NoshGrab
 from api.web import Square
 from config.config import CONFIG
+from api.email import ASes
 import os
 
 app = Flask(__name__)
@@ -20,6 +21,25 @@ def main():
     orders = web_s.get_orders()
 
     db_orders = database.get.orders()
+
+    email_client = ASes(CONFIG.info['email'])
+    args = {
+        'TEST': 1234, 
+        'OTHER': 'TESTING', 
+        'NEST': {
+            'NESTED': 'VALUE1',
+            'LIST': [
+                {
+                    'id': 1
+                },
+                {
+                    'id': 2
+                }
+            ]
+            },
+        }
+    rendered = email_client.load_template('test.template', args)
+    print(rendered)
 
     # Check for every order from Square. Check if order is in the database list of orders from database.get.orders()
     for order in orders:

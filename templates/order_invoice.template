@@ -1,0 +1,131 @@
+<html>
+    <head></head>
+    <body>
+        <div>
+            <h1>NoshGrab Catering</h1>
+            <h2>New Order Recieved:</h2>
+        </div>
+        <div class="reciept-table">
+            <table>
+                <caption>
+                    <h3>Order #4123415</h3>
+                    <h4>Pick-Up:</h4>
+                    <p>Time: 12:10AM<br>
+                    Location: 8151 Handsome Joe Ln, Manassas, VA 20111</p>
+                </caption>
+                <tbody>
+                    <tr>
+                        <th scope="row">Ganagnam Chicken Small</th>
+                        <td>x1</td>
+                        <td>$10.00</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Truffle Fries</th>
+                        <td>x2</td>
+                        <td>$14.00</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Kimichi Fried Rice</th>
+                        <td>x1</td>
+                        <td>$12.00</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Cauliflower Poppers</th>
+                        <td>x1</td>
+                        <td>$9.00</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th scope="row">Subtotal</th>
+                        <td colspan="2">$45.00</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Service Charge</th>
+                        <td colspan="2">- $2.00</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Taxes</th>
+                        <td colspan="2">- $0.08</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Credit Card Fee</th>
+                        <td colspan="2">- $0.03</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Total</th>
+                        <td colspan="2">$10.00</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </body>
+</html>
+
+<style>
+    * {
+        font-family: sans-serif;
+    }
+    h3 {
+        line-height: 10px;
+    }
+
+    h4 {
+        line-height: 0px;
+        margin-bottom: 0px;
+    }
+    
+    .reciept-table {
+        border-radius: 15px;
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
+        /* margin: 20px; */
+        width: 500px;
+    }
+
+    caption{
+        background-color: #546476;
+        color: #f3f3f3;
+        text-align: left;
+        border-top-right-radius: 10px;
+        border-top-left-radius: 10px;
+        padding-left: 3px;
+    }
+
+    table {
+        border-collapse: collapse;
+        margin: 25px 0;
+        font-size: 0.9em;
+        font-family: sans-serif;
+        width: 100%;
+        border-spacing: 0;
+    }
+
+    tbody td{
+        text-align: right;
+    }
+
+    tbody th{
+        text-align: left;
+    }
+
+    tbody tr {
+        border-bottom: 1px solid #dddddd;
+    }
+
+    tbody tr:nth-of-type(even) {
+        background-color: #f3f3f3;
+    }
+
+    tbody tr:last-of-type {
+        border-bottom: 1px solid #546476;
+    }
+
+    th, td {
+        padding: 3px;
+    }
+
+    tfoot{
+        text-align: right;
+    }
+
+</style>
