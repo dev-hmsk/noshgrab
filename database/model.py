@@ -60,7 +60,7 @@ class Account(AbstractModel):
 
 class Order(AbstractModel):
     __tablename__ = "order"
-    id = orm.mapped_column(String(30), primary_key=True)
+    id = orm.mapped_column(String(50), primary_key=True)
     parent_id = orm.Mapped[str]
     account_id: orm.Mapped[str]
     state: orm.Mapped[OrderState]
