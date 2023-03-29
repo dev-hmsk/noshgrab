@@ -21,24 +21,42 @@ def main():
     db_orders = database.get.orders()
     account_list = web_s.get_accounts()
 
+    '''
+    For testing purposes: Drop and then Create all database tables.
+
+    The below logic assumes that as new orders come in we will check against the database,
+    add the order if not present in database, then check OrderState.
+    If OPEN we parse_order(order). This is then appended to an order_list[].
+    Then for every order in the order_list, we loop for every sub_order,
+    and add them as novel orders to the database.
+    We then run create_json_email() and pass in the iterated sub_order
+    with the account_list given to us by web_s.get_accounts().
+
+    This will allow us to create a novel JSON for every sub_order 
+    which will have the relevant info needed to send out 
+    an automated email to the apprioriate account
+    '''
+
     order_list = []
     json_list = []
     for order in orders:
         if order not in db_orders:
             database.add(order)
-        if order.state == OrderState.OPEN:
-            # print('parsing orders', order.id)
-            order_list.append(parse_order(order))
+            if order.state == OrderState.OPEN:
+                # print('parsing orders', order.id)
+                order_list.append(parse_order(order))
 
     for order in order_list:
         for sub_order in order:
             if sub_order not in db_orders:
                 print(f'adding {sub_order.id}')
                 database.add(sub_order)
-    
-    # do not indent. this recreates above for loop within the function. We can change this later if need be.
-    # i am currently working to nest this within above for loop in future commit.
-    json_list.append(create_json_email(account_list, order_list))
+                '''
+                We can assume if line 35 'if' statement is triggered that
+                we have not yet sent out the email. 
+                Thus a new email JSON should be created
+                '''
+                json_list.append(create_json_email(account_list, sub_order))
 
     print(order_list)
     print(json_list)
@@ -75,7 +93,7 @@ def parse_order(order):
     return order_list
 
 
-def create_json_email(account_list, order_list):
+def create_json_email(account_list, sub_order):
     json_email_list = []
     account_dict = {}
     for account in account_list:
@@ -83,29 +101,28 @@ def create_json_email(account_list, order_list):
                                     account.email, account.address,
                                     account.locality, account.state,
                                     account.postal, account.country]
-    for order in order_list:
-        for sub_order in order:
-            item_dict = {}
-            for item in sub_order.items:
-                if item.id not in item_dict:
-                    item_dict[item.id] = [item.id, item.version, item.account_id, item.name, item.price]
-                else:
-                    item_dict[item.id].append(item.id, item.version, item.account_id, item.name, item.price)
-            
-            if sub_order.account_id in account_dict:
-                json_email_dict = {sub_order.id:{'Order_ID': sub_order.id,
-                                                 'Account_ID': sub_order.account_id,
-                                                 'Account_Name': account_dict[sub_order.account_id][1],
-                                                 'Account_Email': account_dict[sub_order.account_id][2],
-                                                 'Account_Address': account_dict[sub_order.account_id][3],
-                                                 'Items': item_dict,
-                                                 'Quantity of each Item': None, # <--- This is not currently ITEM() attr. But is given by get_orders API call
-                                                 'Taxes': sub_order.taxes,
-                                                 'Sub_Total': sub_order.subtotal,
-                                                 'Service Charge': sub_order.subtotal * .20,
-                                                 'Credit Card Fee': (sub_order.subtotal + sub_order.taxes) *.029}}
-                
-                json_email_list.append(json_email_dict)
+
+    item_dict = {}
+    for item in sub_order.items:
+        if item.id not in item_dict:
+            item_dict[item.id] = [item.id, item.version, item.account_id, item.name, item.price]
+        else:
+            item_dict[item.id].append(item.id, item.version, item.account_id, item.name, item.price)
+    
+    if sub_order.account_id in account_dict:
+        json_email_dict = {sub_order.id:{'Order_ID': sub_order.id,
+                                            'Account_ID': sub_order.account_id,
+                                            'Account_Name': account_dict[sub_order.account_id][1],
+                                            'Account_Email': account_dict[sub_order.account_id][2],
+                                            'Account_Address': account_dict[sub_order.account_id][3],
+                                            'Items': item_dict,
+                                            'Quantity of each Item': None, # <--- This is not currently ITEM() attr. But is given by get_orders API call
+                                            'Taxes': sub_order.taxes,
+                                            'Sub_Total': sub_order.subtotal,
+                                            'Service Charge': sub_order.subtotal * .20,
+                                            'Credit Card Fee': (sub_order.subtotal + sub_order.taxes) *.029}}
+        
+        json_email_list.append(json_email_dict)
 
     return json_email_list
 
