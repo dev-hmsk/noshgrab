@@ -95,13 +95,13 @@ class Item(AbstractModel):
 
     items: orm.Mapped["OrderedItem"] = orm.relationship(back_populates="item")
 
-    def __init__(self, item_id, version, item_name, item_price, account_id):
+    def __init__(self, item_id, version, item_name, item_price, account_id): #add item_quant
         self.id = item_id
         self.version = version
         self.account_id = account_id
         self.name = item_name
         self.price = item_price
-
+        #add self.item_quant = item_quant
     def get_price(self):
         return self.price
     

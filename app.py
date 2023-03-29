@@ -1,11 +1,9 @@
 from api.web import Square
-from database.model import db, Order, Item, OrderState
+from database.model import db, Order, OrderState
 from flask import Flask
 from database.managers import NoshGrab
 from api.web import Square
 from config.config import CONFIG
-from datetime import datetime
-import pytz
 import os
 
 app = Flask(__name__)
@@ -21,20 +19,30 @@ def main():
     web_s.connect(os.environ['TOKEN'], environment=CONFIG.info['square']['environment'])
     orders = web_s.get_orders()
     db_orders = database.get.orders()
+    account_list = web_s.get_accounts()
 
-    # Check for every order from Square. Check if order is in the database list of orders from database.get.orders()
     order_list = []
+    json_list = []
     for order in orders:
         if order not in db_orders:
             database.add(order)
-            if order.state == OrderState.OPEN:
-                print('parsing orders', order.id)
-                order_list.append(parse_order(order))
-    # write function to add sub orders to database.
+        if order.state == OrderState.OPEN:
+            # print('parsing orders', order.id)
+            order_list.append(parse_order(order))
+
     for order in order_list:
         for sub_order in order:
-            print(f'adding {sub_order.id}')
-            database.add(sub_order)
+            if sub_order not in db_orders:
+                print(f'adding {sub_order.id}')
+                database.add(sub_order)
+    
+    # do not indent. this recreates above for loop within the function. We can change this later if need be.
+    # i am currently working to nest this within above for loop in future commit.
+    json_list.append(create_json_email(account_list, order_list))
+
+    print(order_list)
+    print(json_list)
+
 
 def parse_order(order):
     account_dict = {}
@@ -65,6 +73,41 @@ def parse_order(order):
         order_list.append(order_object_to_email)
 
     return order_list
+
+
+def create_json_email(account_list, order_list):
+    json_email_list = []
+    account_dict = {}
+    for account in account_list:
+        account_dict[account.id] = [account.id, account.name,
+                                    account.email, account.address,
+                                    account.locality, account.state,
+                                    account.postal, account.country]
+    for order in order_list:
+        for sub_order in order:
+            item_dict = {}
+            for item in sub_order.items:
+                if item.id not in item_dict:
+                    item_dict[item.id] = [item.id, item.version, item.account_id, item.name, item.price]
+                else:
+                    item_dict[item.id].append(item.id, item.version, item.account_id, item.name, item.price)
+            
+            if sub_order.account_id in account_dict:
+                json_email_dict = {sub_order.id:{'Order_ID': sub_order.id,
+                                                 'Account_ID': sub_order.account_id,
+                                                 'Account_Name': account_dict[sub_order.account_id][1],
+                                                 'Account_Email': account_dict[sub_order.account_id][2],
+                                                 'Account_Address': account_dict[sub_order.account_id][3],
+                                                 'Items': item_dict,
+                                                 'Quantity of each Item': None, # <--- This is not currently ITEM() attr. But is given by get_orders API call
+                                                 'Taxes': sub_order.taxes,
+                                                 'Sub_Total': sub_order.subtotal,
+                                                 'Service Charge': sub_order.subtotal * .20,
+                                                 'Credit Card Fee': (sub_order.subtotal + sub_order.taxes) *.029}}
+                
+                json_email_list.append(json_email_dict)
+
+    return json_email_list
 
 
 if __name__ == "__main__": 
