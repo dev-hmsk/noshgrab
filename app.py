@@ -45,7 +45,9 @@ def main():
             if order.state == OrderState.OPEN:
                 # print('parsing orders', order.id)
                 order_list.append(parse_order(order))
-
+    account_dict = {}
+    for account in account_list:
+        account_dict[account.id] = account
     for order in order_list:
         for sub_order in order:
             if sub_order not in db_orders:
@@ -56,7 +58,7 @@ def main():
                 we have not yet sent out the email. 
                 Thus a new email JSON should be created
                 '''
-                json_list.append(create_json_email(account_list, sub_order))
+                json_list.append(create_json_email(account_dict, sub_order))
 
     print(order_list)
     print(json_list)
@@ -93,38 +95,23 @@ def parse_order(order):
     return order_list
 
 
-def create_json_email(account_list, sub_order):
-    json_email_list = []
-    account_dict = {}
-    for account in account_list:
-        account_dict[account.id] = [account.id, account.name,
-                                    account.email, account.address,
-                                    account.locality, account.state,
-                                    account.postal, account.country]
+def create_json_email(account_dict, sub_order):
 
-    item_dict = {}
+    items_json_list = []
     for item in sub_order.items:
-        if item.id not in item_dict:
-            item_dict[item.id] = [item.id, item.version, item.account_id, item.name, item.price]
-        else:
-            item_dict[item.id].append(item.id, item.version, item.account_id, item.name, item.price)
-    
-    if sub_order.account_id in account_dict:
-        json_email_dict = {sub_order.id:{'Order_ID': sub_order.id,
-                                            'Account_ID': sub_order.account_id,
-                                            'Account_Name': account_dict[sub_order.account_id][1],
-                                            'Account_Email': account_dict[sub_order.account_id][2],
-                                            'Account_Address': account_dict[sub_order.account_id][3],
-                                            'Items': item_dict,
-                                            'Quantity of each Item': None, # <--- This is not currently ITEM() attr. But is given by get_orders API call
-                                            'Taxes': sub_order.taxes,
-                                            'Sub_Total': sub_order.subtotal,
-                                            'Service Charge': sub_order.subtotal * .20,
-                                            'Credit Card Fee': (sub_order.subtotal + sub_order.taxes) *.029}}
-        
-        json_email_list.append(json_email_dict)
+        items_json_list.append(item.to_json())
 
-    return json_email_list
+    if sub_order.account_id in account_dict:
+        json_email_dict = {"Order_ID": sub_order.id,
+                           "Account": account_dict[sub_order.account_id].to_json(),
+                           "Items": items_json_list,
+                           "Quantity of each Item": None,
+                           "Taxes": sub_order.taxes,
+                           "Sub_Total": sub_order.subtotal,
+                           "Service Charge": sub_order.subtotal * .20,
+                           "Credit Card Fee": (sub_order.subtotal + sub_order.taxes) *.029}
+
+    return json_email_dict
 
 
 if __name__ == "__main__": 

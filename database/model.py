@@ -58,6 +58,19 @@ class Account(AbstractModel):
         self.postal = postal
         self.country = country
 
+    def to_json(self):
+        account_dict = {"account_id": self.id,
+                        "merchant_id": self.merchant_id,
+                        "name": self.name,
+                        "email": self.email,
+                        "address": self.address,
+                        "locality": self.locality,
+                        "state": self.state,
+                        "postal": self.postal,
+                        "country": self.country}
+
+        return account_dict
+
 class Order(AbstractModel):
     __tablename__ = "order"
     id = orm.mapped_column(String(50), primary_key=True)
@@ -102,9 +115,19 @@ class Item(AbstractModel):
         self.name = item_name
         self.price = item_price
         #add self.item_quant = item_quant
+
     def get_price(self):
         return self.price
-    
+
+    def to_json(self):
+        item_dict = {"id": self.id,
+                     "name": self.name,
+                     "price": self.price,
+                     "account_id": self.account_id,
+                     "version": self.version}
+        return item_dict
+
+
     # Items overrides the __eq__ from the abstract class because it utilizes version to gaurantee uniqueness
     def __eq__(self, object):
         if not object:
