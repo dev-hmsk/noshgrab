@@ -4,6 +4,7 @@ from flask import Flask
 from database.managers import NoshGrab
 from api.web import Square
 from config.config import CONFIG
+import json 
 import os
 
 app = Flask(__name__)
@@ -41,7 +42,7 @@ def main():
     json_list = []
     for order in orders:
         if order not in db_orders:
-            database.add(order)
+            # database.add(order)
             if order.state == OrderState.OPEN:
                 # print('parsing orders', order.id)
                 order_list.append(parse_order(order))
@@ -51,8 +52,8 @@ def main():
     for order in order_list:
         for sub_order in order:
             if sub_order not in db_orders:
-                print(f'adding {sub_order.id}')
-                database.add(sub_order)
+                # print(f'adding {sub_order.id}')
+                # database.add(sub_order)
                 '''
                 We can assume if line 35 'if' statement is triggered that
                 we have not yet sent out the email. 
@@ -67,6 +68,8 @@ def main():
         for item in order.items:
             print(item.name)
             print(item.price)
+    print(order_list)
+    print(json.dumps(json_list, indent=3))
 
 
 def parse_order(order):
@@ -85,14 +88,13 @@ def parse_order(order):
         subtotal = 0
         for item in items:
             subtotal += item.price
-        taxes = subtotal * .0825        # calculate this later using tax rate
-        service_fee = 0                 # calculate this later using service fee %
-        credit_fee = 0                  # caluclate this later using credit fee %
+        taxes = subtotal * CONFIG.info['invoice_percentage']['taxes']
+        service_fee = subtotal * CONFIG.info['invoice_percentage']['service_fee']
         created_at = order.created_at
         # create new object for email use
         order_object_to_email = Order(order_id, account_id, OrderState.OPEN,
                                     subtotal, taxes,
-                                    service_fee, credit_fee,
+                                    service_fee,
                                     created_at, items,
                                     parent_id)
         order_list.append(order_object_to_email)
@@ -107,14 +109,14 @@ def create_json_email(account_dict, sub_order):
         items_json_list.append(item.to_json())
 
     if sub_order.account_id in account_dict:
-        json_email_dict = {"Order_ID": sub_order.id,
-                           "Account": account_dict[sub_order.account_id].to_json(),
-                           "Items": items_json_list,
-                           "Quantity of each Item": None,
-                           "Taxes": sub_order.taxes,
-                           "Sub_Total": sub_order.subtotal,
-                           "Service Charge": sub_order.subtotal * .20,
-                           "Credit Card Fee": (sub_order.subtotal + sub_order.taxes) *.029}
+        json_email_dict = {"order":
+                           {"id": sub_order.id,
+                            "Account": account_dict[sub_order.account_id].to_json(),
+                            "Items": items_json_list,
+                            "taxes": sub_order.subtotal * CONFIG.info['invoice_percentage']['taxes'],
+                            "sub_total": sub_order.subtotal,
+                            "service_fee": sub_order.subtotal * CONFIG.info['invoice_percentage']['service_fee'],
+                            "credit_card_fee": (sub_order.subtotal + (sub_order.subtotal * CONFIG.info['invoice_percentage']['taxes'])) * CONFIG.info['invoice_percentage']['credit_fee']}}
 
     return json_email_dict
 

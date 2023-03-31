@@ -120,7 +120,6 @@ class Square:
             order_sub_total = (order_total + order_discount) - (order_taxes + order_service_fee + order_tip)
 
             order_date = order['created_at']
-            credit_fee = 0
             line_items = order.get('line_items')
             item_object_list = []
 
@@ -138,7 +137,7 @@ class Square:
                     item_object_list.append(item_object)
 
             order_object = Order(order_id, account_id, state_enum, order_sub_total, order_taxes,
-                                 order_service_fee, credit_fee, order_date, item_object_list)
+                                 order_service_fee, order_date, item_object_list)
             
             order_object_list.append(order_object)
 

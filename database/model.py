@@ -66,19 +66,6 @@ class Account(AbstractModel):
         self.postal = postal
         self.country = country
 
-    # def to_json(self):
-    #     account_dict = {"account_id": self.id,
-    #                     "merchant_id": self.merchant_id,
-    #                     "name": self.name,
-    #                     "email": self.email,
-    #                     "address": self.address,
-    #                     "locality": self.locality,
-    #                     "state": self.state,
-    #                     "postal": self.postal,
-    #                     "country": self.country}
-    
-    #     return account_dict
-
 class Order(AbstractModel):
     __tablename__ = "order"
     id = orm.mapped_column(String(50), primary_key=True)
@@ -88,13 +75,12 @@ class Order(AbstractModel):
     subtotal: orm.Mapped[float]
     taxes: orm.Mapped[float]
     service_fee: orm.Mapped[Optional[float]]
-    credit_fee: orm.Mapped[Optional[float]]
     created_at: orm.Mapped[datetime.datetime]
 
     orders: orm.Mapped["OrderedItem"] = orm.relationship(back_populates="order")
 
     def __init__(self, order_id, account_id, state=None, subtotal=0, taxes=0,
-                 service_fee=0, credit_fee=0, created_at=None, items=None, parent_id=None):
+                 service_fee=0, created_at=None, items=None, parent_id=None):
         self.id = order_id
         self.parent_id = parent_id
         self.account_id = account_id
@@ -102,7 +88,6 @@ class Order(AbstractModel):
         self.subtotal = subtotal
         self.taxes = taxes
         self.service_fee = service_fee
-        self.credit_fee = credit_fee
         self.created_at = created_at
         self.items = items
 
@@ -113,28 +98,17 @@ class Item(AbstractModel):
     account_id: orm.Mapped[str]
     name: orm.Mapped[str]
     price: orm.Mapped[float]
-
     items: orm.Mapped["OrderedItem"] = orm.relationship(back_populates="item")
 
-    def __init__(self, item_id, version, item_name, item_price, account_id): #add item_quant
+    def __init__(self, item_id, version, item_name, item_price, account_id):
         self.id = item_id
         self.version = version
         self.account_id = account_id
         self.name = item_name
         self.price = item_price
-        #add self.item_quant = item_quant
 
     def get_price(self):
         return self.price
-
-    # def to_json(self):
-    #     item_dict = {"id": self.id,
-    #                  "name": self.name,
-    #                  "price": self.price,
-    #                  "account_id": self.account_id,
-    #                  "version": self.version}
-    #     return item_dict
-
 
     # Items overrides the __eq__ from the abstract class because it utilizes version to gaurantee uniqueness
     def __eq__(self, object):
