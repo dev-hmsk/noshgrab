@@ -60,8 +60,13 @@ def main():
                 '''
                 json_list.append(create_json_email(account_dict, sub_order))
 
-    print(order_list)
-    print(json_list)
+    # print(order_list)
+    # print(json_list)
+    for order in orders:
+        print(order.to_json)
+        for item in order.items:
+            print(item.name)
+            print(item.price)
 
 
 def parse_order(order):

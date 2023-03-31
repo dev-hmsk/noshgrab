@@ -26,13 +26,21 @@ class AbstractModel(db.Model):
         if not object:
             return False
         return self.id == object.id
-    
-    # This update function will look for all public attributes and update it withe the new objects public attribute of the same name
+
+    # This update function will look for all public attributes and update it with the the new objects public attribute of the same name
     def update(self, updated_object):
         for attr in vars(self):
             if not attr.startswith('_'):
                 updated_value = getattr(updated_object, attr)
                 setattr(self, attr, updated_value)
+
+    def to_json(self):
+        self_dict = {}
+        for attr in vars(self):
+            if not attr.startswith('_'):
+                self_dict[attr] = getattr(self, attr)
+        return self_dict
+
 
 class Account(AbstractModel):
     __tablename__ = "account"
@@ -58,18 +66,18 @@ class Account(AbstractModel):
         self.postal = postal
         self.country = country
 
-    def to_json(self):
-        account_dict = {"account_id": self.id,
-                        "merchant_id": self.merchant_id,
-                        "name": self.name,
-                        "email": self.email,
-                        "address": self.address,
-                        "locality": self.locality,
-                        "state": self.state,
-                        "postal": self.postal,
-                        "country": self.country}
-
-        return account_dict
+    # def to_json(self):
+    #     account_dict = {"account_id": self.id,
+    #                     "merchant_id": self.merchant_id,
+    #                     "name": self.name,
+    #                     "email": self.email,
+    #                     "address": self.address,
+    #                     "locality": self.locality,
+    #                     "state": self.state,
+    #                     "postal": self.postal,
+    #                     "country": self.country}
+    
+    #     return account_dict
 
 class Order(AbstractModel):
     __tablename__ = "order"
@@ -119,13 +127,13 @@ class Item(AbstractModel):
     def get_price(self):
         return self.price
 
-    def to_json(self):
-        item_dict = {"id": self.id,
-                     "name": self.name,
-                     "price": self.price,
-                     "account_id": self.account_id,
-                     "version": self.version}
-        return item_dict
+    # def to_json(self):
+    #     item_dict = {"id": self.id,
+    #                  "name": self.name,
+    #                  "price": self.price,
+    #                  "account_id": self.account_id,
+    #                  "version": self.version}
+    #     return item_dict
 
 
     # Items overrides the __eq__ from the abstract class because it utilizes version to gaurantee uniqueness
