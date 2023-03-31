@@ -26,13 +26,21 @@ class AbstractModel(db.Model):
         if not object:
             return False
         return self.id == object.id
-    
-    # This update function will look for all public attributes and update it withe the new objects public attribute of the same name
+
+    # This update function will look for all public attributes and update it with the the new objects public attribute of the same name
     def update(self, updated_object):
         for attr in vars(self):
             if not attr.startswith('_'):
                 updated_value = getattr(updated_object, attr)
                 setattr(self, attr, updated_value)
+
+    def to_json(self):
+        self_dict = {}
+        for attr in vars(self):
+            if not attr.startswith('_'):
+                self_dict[attr] = getattr(self, attr)
+        return self_dict
+
 
 class Account(AbstractModel):
     __tablename__ = "account"
@@ -60,20 +68,19 @@ class Account(AbstractModel):
 
 class Order(AbstractModel):
     __tablename__ = "order"
-    id = orm.mapped_column(String(30), primary_key=True)
+    id = orm.mapped_column(String(50), primary_key=True)
     parent_id = orm.Mapped[str]
     account_id: orm.Mapped[str]
     state: orm.Mapped[OrderState]
     subtotal: orm.Mapped[float]
     taxes: orm.Mapped[float]
     service_fee: orm.Mapped[Optional[float]]
-    credit_fee: orm.Mapped[Optional[float]]
     created_at: orm.Mapped[datetime.datetime]
 
     orders: orm.Mapped["OrderedItem"] = orm.relationship(back_populates="order")
 
     def __init__(self, order_id, account_id, state=None, subtotal=0, taxes=0,
-                 service_fee=0, credit_fee=0, created_at=None, items=None, parent_id=None):
+                 service_fee=0, created_at=None, items=None, parent_id=None):
         self.id = order_id
         self.parent_id = parent_id
         self.account_id = account_id
@@ -81,7 +88,6 @@ class Order(AbstractModel):
         self.subtotal = subtotal
         self.taxes = taxes
         self.service_fee = service_fee
-        self.credit_fee = credit_fee
         self.created_at = created_at
         self.items = items
 
@@ -92,7 +98,6 @@ class Item(AbstractModel):
     account_id: orm.Mapped[str]
     name: orm.Mapped[str]
     price: orm.Mapped[float]
-
     items: orm.Mapped["OrderedItem"] = orm.relationship(back_populates="item")
 
     def __init__(self, item_id, version, item_name, item_price, account_id):
@@ -104,7 +109,7 @@ class Item(AbstractModel):
 
     def get_price(self):
         return self.price
-    
+
     # Items overrides the __eq__ from the abstract class because it utilizes version to gaurantee uniqueness
     def __eq__(self, object):
         if not object:

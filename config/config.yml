@@ -16,6 +16,19 @@ default: &default
   account:
     name: 'Noshgrab-Development'
     id: 'LCT2A6T5GMYK0'
+  
+  invoice_percentage:
+    credit_fee: .029
+    taxes: .0825
+    service_fee: .20
+
+  email:
+    aws_region: us-east-1
+    charset: UTF-8
+    template: order_invoice.template
+    sender: wes.dev.acc@gmail.com
+    recipients:
+      - wes.dev.acc@gmail.com  
 
 PRODUCTION:
   square:
@@ -27,6 +40,4 @@ DEVELOPMENT:
 
 TEST:
   <<: *default
-
-
 
