@@ -1,0 +1,185 @@
+{% set sub_total = order.sub_total/100 | float | round(2) %}
+{% set taxes =  order.taxes/100 | float | round(2) %}
+{% set service_fee =  order.service_fee/100 | float | round(2) %}
+{% set credit_card_fee =  order.credit_card_fee/100 | float | round(2) %}
+{% set total =  (sub_total + taxes) - (service_fee + credit_card_fee) %}
+{% set account = order.Account %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            * {
+                font-family: sans-serif;
+            }
+            h3 {
+                line-height: 10px;
+            }
+
+            h4 {
+                line-height: 0px;
+                margin-bottom: 0px;
+            }
+            
+            .reciept-table {
+                border-radius: 15px;
+                box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
+                /* margin: 20px; */
+                width: 500px;
+            }
+
+            caption{
+                background-color: #546476;
+                color: #f3f3f3;
+                text-align: left;
+                border-top-right-radius: 10px;
+                border-top-left-radius: 10px;
+                padding-left: 3px;
+            }
+
+            table {
+                border-collapse: collapse;
+                margin: 25px 0;
+                font-size: 0.9em;
+                font-family: sans-serif;
+                width: 100%;
+                border-spacing: 0;
+            }
+
+            tbody td{
+                text-align: right;
+            }
+
+            tbody th{
+                text-align: left;
+            }
+
+            tbody tr {
+                border-bottom: 1px solid #dddddd;
+            }
+
+            tbody tr:nth-of-type(even) {
+                background-color: #f3f3f3;
+            }
+
+            tbody tr:last-of-type {
+                border-bottom: 1px solid #546476;
+            }
+
+            th, td {
+                padding: 3px;
+            }
+
+            tfoot{
+                text-align: right;
+            }
+
+            .flex-container {
+                display: flex;
+                align-items: center;
+            }
+
+            .flex-child{
+                margin-left: 20px;
+            }  
+
+            .button {
+                padding: 16px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                transition-duration: 0.4s;
+                border-radius: 10px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .accept {
+                background-color: #e7e7e7;
+                color: #000000;
+                border: 1px solid #546476;
+            }
+
+            .accept:hover {
+                background-color: #008CBA;
+                color: #f3f3f3
+            }
+
+            .decline {
+                background-color: #e7e7e7;
+                color: #000000;
+                border: 1px solid #546476;
+            }
+
+            .decline:hover {
+                background-color: #f44336;
+                color: #f3f3f3
+            }
+
+        </style>
+    </head>
+    <body>
+        <div>
+            <h1>NoshGrab Catering: Thursday 3/25 @ 12:00PM</h1>
+            <h2>New Order Recieved: {{account.name}}</h2>
+        </div>
+        <div class="reciept-table">
+            <table>
+                <caption>
+                    <h3>Order #{{order.id}}</h3>
+                    <h4>Pick-Up:</h4>
+                    <p>Time: 12:10AM<br>
+                    Location: {{account.address}} {{account.locality}},{{account.state}} {{account.postal}}</p>
+                </caption>
+                <tbody>
+                    {% for item in order.Items-%}
+                    <tr>
+                        <th scope="row">{{item.name}}</th>
+                        <td>x{{item.quantity}}</td>
+                        <td>${{"%0.2f" | format(item.price/100 | float | round(2))}}</td>
+                    </tr>
+                    {% endfor -%}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th scope="row">Subtotal</th>
+                        <td colspan="2">${{"%0.2f" | format(sub_total)}}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Taxes</th>
+                        <td colspan="2">${{"%0.2f" | format(taxes)}}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Service Charge</th>
+                        <td colspan="2">- ${{"%0.2f" | format(service_fee)}}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Credit Card Fee</th>
+                        <td colspan="2">- ${{"%0.2f" | format(credit_card_fee)}}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Total</th>
+                        <td colspan="2">${{"%0.2f" | format(total)}}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div>
+            <h3 style="color:red">Please provide the appropriate amount of utensils per order</h3>
+        </div>
+        <div class="flex-container">
+            <div>
+                <h3>Order Confirmation:</h3>
+            </div>
+            <div class="flex-child">
+                <a class="button accept" href="http://127.0.01:5000/">ACCEPT</a>
+            </div>
+            <div class="flex-child">
+                <form>
+                    <a class="button decline" href="http://127.0.01:5000/">DECLINE</a>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

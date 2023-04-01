@@ -1,7 +1,0 @@
-TEST.TEMPLATE
-FIRST {{TEST}}
-SECOND {{OTHER}}
-NESTED TEST {{NEST.NESTED}}
-{% for value in NEST.LIST -%}
-    {{value.id}}
-{% endfor %}

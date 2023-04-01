@@ -9,8 +9,10 @@ class ASes:
         self.recipents = config['recipients']
         self.aws_region = config['aws_region']
         self.charset = config['charset']
-
+        self.template_env = Environment(loader=FileSystemLoader('templates'))
         self.client = boto3.client('ses',region_name=config['aws_region'])
+        self.template = None
+        self._rendered_template = ''
 
     '''
     template: template filename
@@ -19,14 +21,19 @@ class ASes:
     Return:
         rendered_template: rendered template object
     '''
-    def load_template(self, template, args):
-        env = Environment(loader=FileSystemLoader('templates'))
-        template = env.get_template(template)
-        self.rendered_template = template.render(args)
+    def load_template(self, template, args=None):
+        self.template = self.template_env.get_template(template)
         
-        return self.rendered_template
+        if args:
+            return self.render_template(args)
 
-    def send(self, subject, body):
+    def render_template(self, args):
+        self._rendered_template = self.template.render(args)
+        return self._rendered_template
+
+    def send(self, subject, body=None):
+        if not body:
+            body = self._rendered_template
         try:
             response = self.client.send_email(
                 Destination={

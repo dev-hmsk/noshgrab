@@ -20,7 +20,7 @@ default: &default
   invoice_percentage:
     credit_fee: .029
     taxes: .0825
-    service_fee: .20
+    service_fee: .17
 
   email:
     aws_region: us-east-1

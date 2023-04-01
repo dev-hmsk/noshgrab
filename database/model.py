@@ -10,7 +10,7 @@ from functools import wraps
 
 from config.config import CONFIG
 
-db = SQLAlchemy()
+db = SQLAlchemy(session_options={"expire_on_commit": False})
 
 class OrderState(enum.Enum):
     OPEN = "OPEN"
@@ -40,27 +40,27 @@ class AbstractModel(db.Model):
                 updated_value = getattr(updated_object, attr)
                 setattr(self, attr, updated_value)
 
-<<<<<<< HEAD
-    def _date_setter():
-        def decorator(func):
-            @wraps(func)
-            def wrapper(self, date):
-                try:
-                    date_str = '%Y-%m-%dT%H:%M:%S.%fz'
-                    func(self, datetime.datetime.strptime(date, date_str).date())
-                except ValueError as e:
-                    raise DateConversion(f'Failed to convert {date} to format: {date_str}')
-            return wrapper
-        return decorator
-=======
     def to_json(self):
         self_dict = {}
         for attr in vars(self):
             if not attr.startswith('_'):
                 self_dict[attr] = getattr(self, attr)
         return self_dict
-
->>>>>>> main
+    
+    def _date_setter():
+        def decorator(func):
+            @wraps(func)
+            def wrapper(self, date):
+                try:
+                    if isinstance(date, datetime.datetime):
+                        func(self,date)
+                    else:
+                        date_str = '%Y-%m-%dT%H:%M:%S.%fz'
+                        func(self, datetime.datetime.strptime(date, date_str))
+                except ValueError as e:
+                    raise DateConversion(f'Failed to convert {date} to format: {date_str}')
+            return wrapper
+        return decorator
 
 class Account(AbstractModel):
     __tablename__ = "account"
@@ -94,22 +94,19 @@ class Order(AbstractModel):
     state: orm.Mapped[OrderState]
     subtotal: orm.Mapped[float]
     taxes: orm.Mapped[float]
-    service_fee: orm.Mapped[Optional[float]]
-    credit_fee: orm.Mapped[Optional[float]]
     _created_at: orm.Mapped[datetime.datetime] = orm.mapped_column('created_at')
     _updated_at: orm.Mapped[datetime.datetime] = orm.mapped_column('updated_at')
 
     orders: orm.Mapped["OrderedItem"] = orm.relationship(back_populates="order")
 
     def __init__(self, order_id, account_id, state=None, subtotal=0, taxes=0,
-                 service_fee=0, created_at=None, updated_at=None, items=None, parent_id=None):
+                 created_at=None, updated_at=None, items=None, parent_id=None):
         self.id = order_id
         self.parent_id = parent_id
         self.account_id = account_id
         self.state = state
         self.subtotal = subtotal
         self.taxes = taxes
-        self.service_fee = service_fee
         self.created_at = created_at
         self.updated_at = updated_at
         self.items = items
@@ -141,12 +138,18 @@ class Item(AbstractModel):
     price: orm.Mapped[float]
     items: orm.Mapped["OrderedItem"] = orm.relationship(back_populates="item")
 
-    def __init__(self, item_id, version, item_name, item_price, account_id):
+    def __init__(self, item_id, version, item_name, item_price, account_id, gross_sales=None, quantity=1):
         self.id = item_id
         self.version = version
         self.account_id = account_id
         self.name = item_name
         self.price = item_price
+        self.quantity = quantity
+        
+        if gross_sales:
+            self.gross_sales = gross_sales
+        else:
+            self.gross_sales = item_price
 
     def get_price(self):
         return self.price

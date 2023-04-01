@@ -93,7 +93,6 @@ class Square:
     def get_orders(self):
         # We will query for orders from Web API based on the main account id set in config.yml
         result = self.client.orders.search_orders(body = {"location_ids": [CONFIG.info['account']['id']],"query": {"filter": {}}})
-
         if result.is_error():
             print(result.errors)
             return None
@@ -109,15 +108,7 @@ class Square:
             state_enum = OrderState(order['state'])
             
             order_taxes = order['net_amounts']['tax_money']['amount']
-            order_service_fee = order['net_amounts']['service_charge_money']['amount']
-            order_tip = order['net_amounts']['tip_money']['amount']
-            order_discount = order['net_amounts']['discount_money']['amount']
             order_total = order['net_amounts']['total_money']['amount']
-            '''
-            to calculate sub total we add discount and subtract all other
-            fees/taxes from order_total to give resultant sub total
-            '''
-            order_sub_total = (order_total + order_discount) - (order_taxes + order_service_fee + order_tip)
 
             order_date = order['created_at']
             updated_at = order['updated_at']
@@ -128,17 +119,19 @@ class Square:
                 for item in line_items:
                     item_id = item['catalog_object_id']
                     item_version = item['catalog_version']
+                    quantity = int(item['quantity'])
                     item_name = item['name'] 
-                    item_quantity = int(item['quantity'])
                     item_variation = item_name + " " + item['variation_name']
                     variant_item_account_id = self.retrieve_lineitem_account(item_id)
-                    item_price = item['base_price_money']['amount']
-                    for i in range(item_quantity):
-                        item_object_list.append(Item(item_id, item_version, item_variation,
-                                item_price, variant_item_account_id))
+                    gross_sales = item['gross_sales_money']['amount']
+                    base_price = item['base_price_money']['amount']
+                    item_object = Item(item_id, item_version, item_variation,
+                                       base_price, variant_item_account_id, gross_sales, quantity)
+                    
+                    item_object_list.append(item_object)
 
-            order_object = Order(order_id, account_id, state_enum, order_sub_total, order_taxes,
-                                 order_service_fee, order_date, updated_at, item_object_list)
+            order_object = Order(order_id, account_id, state_enum, order_total, order_taxes,
+                                 order_date, updated_at, item_object_list)
             
             order_object_list.append(order_object)
 
