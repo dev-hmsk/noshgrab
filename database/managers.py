@@ -70,10 +70,18 @@ class NoshGrab:
             # Get the order object and initialize empty list for order.items
             order = results[0][0]
             order.items = []
+            item_dict = {}
 
             # Add all items to order
             for _order, item in results:
-                order.items.append(item)
+                if item.id not in item_dict:
+                    item.gross_sales = item.price
+                    item.quantity = 1
+                    item_dict[item.id] = item
+                    order.items.append(item)
+                else:
+                    item_dict[item.id].quantity += 1
+                    item_dict[item.id].gross_sales += item.price
 
             return order
         
@@ -96,9 +104,18 @@ class NoshGrab:
                 '''
                 if order != current_order:
                     current_order = order
-                    current_order.items = [item]
-                else:
+                    item_dict = {}
+                    current_order.items = []
+
+                if item.id not in item_dict:
+                    item.gross_sales = item.price
+                    item.quantity = 1
+                    item_dict[item.id] = item
                     current_order.items.append(item)
+                else:
+                    item_dict[item.id].quantity += 1
+                    item_dict[item.id].gross_sales += item.price
+
             return orders
 
     '''
@@ -130,15 +147,6 @@ class NoshGrab:
                     return True
                 return wrapper
             return decorator
-        
-        '''
-        The function must query the proper table for the object to update.
-        This function will then return the results of the query and the data
-        to update the object with
-        '''
-        @_update()
-        def item(self, data):
-            return self._get.item(data.id, data.version), data
 
     def __init__(self, engine):
         self.engine = engine
@@ -157,9 +165,10 @@ class NoshGrab:
         if isinstance(data, Order):
             self.session.add(data)
             for item in data.items:
-                if not self.update.item(item):
+                if not self.get.item(item.id, item.version):
                     self.session.add(item)
-                self.session.add(OrderedItem(data.id, item.id, item.version))
+                for i in range(item.quantity):
+                    self.session.add(OrderedItem(data.id, item.id, item.version))
         else:
             self.session.add(data)
         self.session.commit()
