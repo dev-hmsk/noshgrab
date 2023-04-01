@@ -18,9 +18,9 @@ default: &default
     id: 'LCT2A6T5GMYK0'
   
   invoice_percentage:
-    credit_fee: 2.9
-    taxes: 8.25
-    service_fee: 20
+    credit_fee: .029
+    taxes: .0825
+    service_fee: .20
 
   email:
     aws_region: us-east-1
@@ -40,6 +40,4 @@ DEVELOPMENT:
 
 TEST:
   <<: *default
-
-
 

@@ -32,14 +32,15 @@ class AbstractModel(db.Model):
         if not object:
             return False
         return self.id == object.id
-    
-    # This update function will look for all public attributes and update it withe the new objects public attribute of the same name
+
+    # This update function will look for all public attributes and update it with the the new objects public attribute of the same name
     def update(self, updated_object):
         for attr in vars(self):
             if not attr.startswith('_'):
                 updated_value = getattr(updated_object, attr)
                 setattr(self, attr, updated_value)
 
+<<<<<<< HEAD
     def _date_setter():
         def decorator(func):
             @wraps(func)
@@ -51,6 +52,15 @@ class AbstractModel(db.Model):
                     raise DateConversion(f'Failed to convert {date} to format: {date_str}')
             return wrapper
         return decorator
+=======
+    def to_json(self):
+        self_dict = {}
+        for attr in vars(self):
+            if not attr.startswith('_'):
+                self_dict[attr] = getattr(self, attr)
+        return self_dict
+
+>>>>>>> main
 
 class Account(AbstractModel):
     __tablename__ = "account"
@@ -100,7 +110,6 @@ class Order(AbstractModel):
         self.subtotal = subtotal
         self.taxes = taxes
         self.service_fee = service_fee
-        self.credit_fee = (subtotal + taxes) * CONFIG.info['invoice_percentage']['credit_fee']
         self.created_at = created_at
         self.updated_at = updated_at
         self.items = items
@@ -130,7 +139,6 @@ class Item(AbstractModel):
     account_id: orm.Mapped[str]
     name: orm.Mapped[str]
     price: orm.Mapped[float]
-
     items: orm.Mapped["OrderedItem"] = orm.relationship(back_populates="item")
 
     def __init__(self, item_id, version, item_name, item_price, account_id):
@@ -142,7 +150,7 @@ class Item(AbstractModel):
 
     def get_price(self):
         return self.price
-    
+
     # Items overrides the __eq__ from the abstract class because it utilizes version to gaurantee uniqueness
     def __eq__(self, object):
         if not object:
