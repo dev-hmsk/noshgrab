@@ -2,7 +2,7 @@ from square.client import Client
 from database.model import Account, Item, Order
 from config.config import CONFIG
 from database.model import OrderState
-
+import json
 class Square:
     def __init__(self):
         self.client = None
@@ -99,8 +99,10 @@ class Square:
         
         orders = result.body['orders']
         order_object_list = []
-
+        # pretty = json.dumps(orders, indent=4)
+        # print(pretty)
         for order in orders:
+            # print(order)
             order_id = order['id']
             account_id = order['location_id']
 
@@ -111,7 +113,9 @@ class Square:
             order_total = order['net_amounts']['total_money']['amount']
 
             order_date = order['created_at']
+            print(order_date)
             updated_at = order['updated_at']
+            fulfillments = order.get('fulfillments')
             line_items = order.get('line_items')
             item_object_list = []
 
@@ -130,8 +134,14 @@ class Square:
                     
                     item_object_list.append(item_object)
 
+            if fulfillments:
+                for details in fulfillments:
+                    # pickup_details = details['pickup_details']
+                    pickup_at = details['pickup_details']['pickup_at']
+                    print(f'fulfilment date {pickup_at}')
+
             order_object = Order(order_id, account_id, state_enum, order_total, order_taxes,
-                                 order_date, updated_at, item_object_list)
+                                 order_date, updated_at, pickup_at, item_object_list)
             
             order_object_list.append(order_object)
 

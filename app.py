@@ -59,6 +59,7 @@ def main():
         for sub_order in order:
             if sub_order not in db_orders:
                 print(f'adding {sub_order.id}')
+                print(sub_order.pickup_at)
                 database.add(sub_order)
                 json_list.append(create_json_email(account_dict, sub_order))
 
@@ -69,7 +70,7 @@ def main():
         html = email.render_template(order)
         if CONFIG.version == "DEVELOPMENT":
             
-            print(json.dumps(order, indent=3))
+            print(json.dumps(order, indent=4,default=str))
 
             with open(f'{order["order"]["id"]}_invoice.html', 'w') as f:
                 f.write(html)
@@ -84,7 +85,6 @@ def main():
 
 def parse_order(order):
     account_dict = {}
-    
     for item in order.items:
         if item.account_id not in account_dict:
             account_dict[item.account_id] = [item]
@@ -107,10 +107,10 @@ def parse_order(order):
         
         created_at = order.created_at
         updated_at = order.updated_at
-        
+        pickup_at = order.pickup_at
         # create new object for email use
         order_object_to_email = Order(order_id, account_id, OrderState.OPEN, subtotal, taxes,
-                                    created_at, updated_at, items, parent_id)
+                                    created_at, updated_at, pickup_at, items, parent_id)
         order_list.append(order_object_to_email)
 
     return order_list
@@ -129,7 +129,8 @@ def create_json_email(account_dict, sub_order):
                             "taxes": sub_order.taxes,
                             "sub_total": sub_order.subtotal,
                             "service_fee": sub_order.subtotal * CONFIG.info['invoice_percentage']['service_fee'],
-                            "credit_card_fee": (sub_order.subtotal + sub_order.taxes) * CONFIG.info['invoice_percentage']['credit_fee']}}
+                            "credit_card_fee": (sub_order.subtotal + sub_order.taxes) * CONFIG.info['invoice_percentage']['credit_fee'],
+                            "pickup_at": sub_order.pickup_at}}
 
     return json_email_dict
 
@@ -141,4 +142,4 @@ def hello_world():
 if __name__ == "__main__":
     with app.app_context():
         main()
-        app.run()
+        # app.run()
