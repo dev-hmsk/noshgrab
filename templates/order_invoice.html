@@ -4,6 +4,8 @@
 {% set credit_card_fee =  order.credit_card_fee/100 | float | round(2) %}
 {% set total =  (sub_total + taxes) - (service_fee + credit_card_fee) %}
 {% set account = order.Account %}
+{% set pickup_at = order.pickup_at %}
+{% set updated_at = order.updated_at %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -121,7 +123,7 @@
     </head>
     <body>
         <div>
-            <h1>NoshGrab Catering: Thursday 3/25 @ 12:00PM</h1>
+            <h1>NoshGrab Catering: {{updated_at}}</h1>
             <h2>New Order Recieved: {{account.name}}</h2>
         </div>
         <div class="reciept-table">
@@ -129,7 +131,7 @@
                 <caption>
                     <h3>Order #{{order.id}}</h3>
                     <h4>Pick-Up:</h4>
-                    <p>Time: 12:10AM<br>
+                    <p>Time: {{pickup_at}}<br>
                     Location: {{account.address}} {{account.locality}},{{account.state}} {{account.postal}}</p>
                 </caption>
                 <tbody>

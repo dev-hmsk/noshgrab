@@ -136,7 +136,7 @@ class Square:
 
             if fulfillments:
                 for details in fulfillments:
-                    # pickup_details = details['pickup_details']
+                    # pickup_details = details['pickup_details'] <- More info if required. Includes customer info, custom notes. etc.
                     pickup_at = details['pickup_details']['pickup_at']
                     print(f'fulfilment date {pickup_at}')
 

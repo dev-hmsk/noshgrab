@@ -75,13 +75,14 @@ def main():
             with open(f'{order["order"]["id"]}_invoice.html', 'w') as f:
                 f.write(html)
 
+        # email.send(order)
         # Uncomment to test emailing
         # if order['order']['id'] == "TABsvHlgeYGEVx1JKa0aVE4OBBGZY-1":
         #     email.send(f'NoshGrab Catering Order #{order["order"]["id"]}')
 
-        elif CONFIG.version == "PRODUCTION":
-            if order['order']['id'] == "TABsvHlgeYGEVx1JKa0aVE4OBBGZY-1":
-                email.send(f'NoshGrab Catering Order #{order["order"]["id"]}')
+        # elif CONFIG.version == "PRODUCTION":
+        #     if order['order']['id'] == "TABsvHlgeYGEVx1JKa0aVE4OBBGZY-1":
+        #         email.send(f'NoshGrab Catering Order #{order["order"]["id"]}')
 
 def parse_order(order):
     account_dict = {}
@@ -130,6 +131,8 @@ def create_json_email(account_dict, sub_order):
                             "sub_total": sub_order.subtotal,
                             "service_fee": sub_order.subtotal * CONFIG.info['invoice_percentage']['service_fee'],
                             "credit_card_fee": (sub_order.subtotal + sub_order.taxes) * CONFIG.info['invoice_percentage']['credit_fee'],
+                            "created_at": sub_order.created_at,
+                            "updated_at": sub_order.updated_at,
                             "pickup_at": sub_order.pickup_at}}
 
     return json_email_dict

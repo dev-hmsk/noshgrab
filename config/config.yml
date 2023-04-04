@@ -28,7 +28,7 @@ default: &default
     template: order_invoice.template
     sender: wes.dev.acc@gmail.com
     recipients:
-      - wes.dev.acc@gmail.com  
+      - wes.dev.acc@gmail.com
 
 PRODUCTION:
   square:
