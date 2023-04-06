@@ -113,7 +113,6 @@ class Square:
             order_total = order['net_amounts']['total_money']['amount']
 
             order_date = order['created_at']
-            print(order_date)
             updated_at = order['updated_at']
             fulfillments = order.get('fulfillments')
             line_items = order.get('line_items')
@@ -138,10 +137,12 @@ class Square:
                 for details in fulfillments:
                     # pickup_details = details['pickup_details'] <- More info if required. Includes customer info, custom notes. etc.
                     pickup_at = details['pickup_details']['pickup_at']
-                    print(f'fulfilment date {pickup_at}')
+            # This is a current workaround for orders in the test enviroment with no provided pickup_at info
+            else:
+                pickup_at = "0001-01-01T01:00:00.000Z"
 
             order_object = Order(order_id, account_id, state_enum, order_total, order_taxes,
-                                 order_date, updated_at, pickup_at, item_object_list)
+                                    order_date, updated_at, pickup_at, item_object_list)
             
             order_object_list.append(order_object)
 

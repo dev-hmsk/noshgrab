@@ -48,6 +48,9 @@ def main():
     for account in account_list:
         account_dict[account.id] = account
 
+    for account in account_list:
+        database.add(account)
+        
     for order in orders:
         if order not in db_orders:
             database.add(order)
@@ -59,30 +62,36 @@ def main():
         for sub_order in order:
             if sub_order not in db_orders:
                 print(f'adding {sub_order.id}')
-                print(sub_order.pickup_at)
                 database.add(sub_order)
                 json_list.append(create_json_email(account_dict, sub_order))
-
+    
     email = ASes(CONFIG.info['email'])
     email.load_template('order_invoice.html')
 
     for order in json_list:
         html = email.render_template(order)
+        email_address = order["order"]["Account"]["email"]
+        email_subject = 'Noshgrab Order: ' + order["order"]["id"]
         if CONFIG.version == "DEVELOPMENT":
-            
-            print(json.dumps(order, indent=4,default=str))
+            '''
+            I had to set enviroment variables with AWS Keys for below to work.
+            No hardcode.
 
+            Because Sandbox only allows verified emails as senders/recipients we check to ensure 
+            correct order+email pairing by placing the email_subject and email_adress 
+            in the same string which is passed as the email subject line.
+            This ensures we are sending the right order to the right email
+            '''
+            # email.send(email_subject + email_address, 'dev.hmsk@gmail.com')
+            
+            print(json.dumps(order, indent=4, default=str))
+            
             with open(f'{order["order"]["id"]}_invoice.html', 'w') as f:
                 f.write(html)
-
-        # email.send(order)
-        # Uncomment to test emailing
-        # if order['order']['id'] == "TABsvHlgeYGEVx1JKa0aVE4OBBGZY-1":
-        #     email.send(f'NoshGrab Catering Order #{order["order"]["id"]}')
-
+        
+        # Uncomment below for Production usage:
         # elif CONFIG.version == "PRODUCTION":
-        #     if order['order']['id'] == "TABsvHlgeYGEVx1JKa0aVE4OBBGZY-1":
-        #         email.send(f'NoshGrab Catering Order #{order["order"]["id"]}')
+                # email.send(email_subject, email_address)
 
 def parse_order(order):
     account_dict = {}
@@ -145,4 +154,4 @@ def hello_world():
 if __name__ == "__main__":
     with app.app_context():
         main()
-        # app.run()
+        app.run()

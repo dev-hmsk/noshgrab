@@ -26,9 +26,9 @@ default: &default
     aws_region: us-east-1
     charset: UTF-8
     template: order_invoice.template
-    sender: wes.dev.acc@gmail.com
+    sender: dev.hmsk@gmail.com
     recipients:
-      - wes.dev.acc@gmail.com
+      - dev.hmsk@gmail.com
 
 PRODUCTION:
   square:

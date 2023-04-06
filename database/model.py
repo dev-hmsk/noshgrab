@@ -53,6 +53,7 @@ class AbstractModel(db.Model):
             def wrapper(self, date):
                 try:
                     if isinstance(date, datetime.datetime):
+                        print(date)
                         func(self, date)
                     else:
                         # print(date)
@@ -139,8 +140,6 @@ class Order(AbstractModel):
     @AbstractModel._date_setter()
     def pickup_at(self, date):
         self._pickup_at = date
-    
-
 
 class Item(AbstractModel):
     __tablename__ = "item"

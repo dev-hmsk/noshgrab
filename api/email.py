@@ -3,10 +3,14 @@ import boto3
 from botocore.exceptions import ClientError
 from jinja2 import Environment, FileSystemLoader
 
+
+# boto3.set_stream_logger('botocore', level='DEBUG')
+
 class ASes:
     def __init__(self, config):
         self.sender = config['sender']
-        self.recipents = config['recipients']
+        # removed this to instead pass in email_address as arguement from order["order"]["Account"]["email"] in app.py
+        # self.recipents = config['recipients']
         self.aws_region = config['aws_region']
         self.charset = config['charset']
         self.template_env = Environment(loader=FileSystemLoader('templates'))
@@ -21,6 +25,7 @@ class ASes:
     Return:
         rendered_template: rendered template object
     '''
+    
     def load_template(self, template, args=None):
         self.template = self.template_env.get_template(template)
         
@@ -31,13 +36,13 @@ class ASes:
         self._rendered_template = self.template.render(args)
         return self._rendered_template
 
-    def send(self, subject, body=None):
+    def send(self, subject, email_address, body=None):
         if not body:
             body = self._rendered_template
         try:
             response = self.client.send_email(
                 Destination={
-                    'ToAddresses': self.recipents
+                    'ToAddresses': [email_address]
                 },
                 Message={
                     'Body': {
