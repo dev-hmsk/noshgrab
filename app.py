@@ -1,4 +1,4 @@
-import json
+import time
 import os
 from api.web import Square
 from database.model import db, Order, OrderState
@@ -16,6 +16,8 @@ db_config = CONFIG.info['database']
 app.config['SQLALCHEMY_DATABASE_URI'] = f'{db_config["dialect"]}://{db_config["user"]}:{os.environ["DB_PASS"]}@{db_config["ip"]}:{db_config["port"]}/{db_config["name"]}'
 
 db.init_app(app)
+
+START = 1
 
 def main():
     web_s = Square()
@@ -84,14 +86,12 @@ def main():
             '''
             # email.send(email_subject + email_address, 'dev.hmsk@gmail.com')
             
-            print(json.dumps(order, indent=4, default=str))
-            
             with open(f'{order["order"]["id"]}_invoice.html', 'w') as f:
                 f.write(html)
         
         # Uncomment below for Production usage:
-        # elif CONFIG.version == "PRODUCTION":
-                # email.send(email_subject, email_address)
+        elif CONFIG.version == "PRODUCTION":
+            email.send(email_subject, email_address)
 
 def parse_order(order):
     account_dict = {}
@@ -153,5 +153,9 @@ def hello_world():
 
 if __name__ == "__main__":
     with app.app_context():
-        main()
-        app.run()
+        while START == 1:
+            print("running main")
+            main()
+            print("sleep 3")
+            time.sleep(3)
+

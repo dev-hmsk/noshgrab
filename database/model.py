@@ -56,7 +56,6 @@ class AbstractModel(db.Model):
                         print(date)
                         func(self, date)
                     else:
-                        # print(date)
                         date_str = '%Y-%m-%dT%H:%M:%S.%fz'
                         func(self, datetime.datetime.strptime(date, date_str))
                 except ValueError as e:

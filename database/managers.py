@@ -51,8 +51,10 @@ class NoshGrab:
         # Return account based on account id
         @_select_id_compare(Account)
         def account(self, _id):
-            pass
-        
+            print("step in check")
+            results = self.execute(self.select(Account).filter_by(id = _id)).scalars().first()
+            return results
+                    
         # Return order object and its items
         def order(self, _id):
             # Join is used with filter here to find the specific order based on id
@@ -169,6 +171,11 @@ class NoshGrab:
                     self.session.add(item)
                 for i in range(item.quantity):
                     self.session.add(OrderedItem(data.id, item.id, item.version))
+        
+        if isinstance(data, Account):
+            if not self.get.account(data.id):
+                print("check")
+                self.session.add(data)
         else:
             self.session.add(data)
         self.session.commit()
