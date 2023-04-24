@@ -53,7 +53,8 @@ class AbstractModel(db.Model):
             def wrapper(self, date):
                 try:
                     if isinstance(date, datetime.datetime):
-                        func(self,date)
+                        print(date)
+                        func(self, date)
                     else:
                         date_str = '%Y-%m-%dT%H:%M:%S.%fz'
                         func(self, datetime.datetime.strptime(date, date_str))
@@ -96,11 +97,11 @@ class Order(AbstractModel):
     taxes: orm.Mapped[float]
     _created_at: orm.Mapped[datetime.datetime] = orm.mapped_column('created_at')
     _updated_at: orm.Mapped[datetime.datetime] = orm.mapped_column('updated_at')
-
+    _pickup_at: orm.Mapped[datetime.datetime] = orm.mapped_column('pickup_at')
     orders: orm.Mapped["OrderedItem"] = orm.relationship(back_populates="order")
 
     def __init__(self, order_id, account_id, state=None, subtotal=0, taxes=0,
-                 created_at=None, updated_at=None, items=None, parent_id=None):
+                 created_at=None, updated_at=None, pickup_at=None, items=None, parent_id=None):
         self.id = order_id
         self.parent_id = parent_id
         self.account_id = account_id
@@ -109,6 +110,7 @@ class Order(AbstractModel):
         self.taxes = taxes
         self.created_at = created_at
         self.updated_at = updated_at
+        self.pickup_at = pickup_at
         self.items = items
     
     @property
@@ -128,6 +130,15 @@ class Order(AbstractModel):
     @AbstractModel._date_setter()
     def updated_at(self, date):
         self._updated_at = date
+
+    @property
+    def pickup_at(self):
+        return self._pickup_at
+    
+    @pickup_at.setter
+    @AbstractModel._date_setter()
+    def pickup_at(self, date):
+        self._pickup_at = date
 
 class Item(AbstractModel):
     __tablename__ = "item"

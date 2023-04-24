@@ -1,4 +1,4 @@
-import json
+import time
 import os
 from api.web import Square
 from database.model import db, Order, OrderState
@@ -16,6 +16,8 @@ db_config = CONFIG.info['database']
 app.config['SQLALCHEMY_DATABASE_URI'] = f'{db_config["dialect"]}://{db_config["user"]}:{os.environ["DB_PASS"]}@{db_config["ip"]}:{db_config["port"]}/{db_config["name"]}'
 
 db.init_app(app)
+
+START = 1
 
 def main():
     web_s = Square()
@@ -48,6 +50,9 @@ def main():
     for account in account_list:
         account_dict[account.id] = account
 
+    for account in account_list:
+        database.add(account)
+        
     for order in orders:
         if order not in db_orders:
             database.add(order)
@@ -61,30 +66,35 @@ def main():
                 print(f'adding {sub_order.id}')
                 database.add(sub_order)
                 json_list.append(create_json_email(account_dict, sub_order))
-
+    
     email = ASes(CONFIG.info['email'])
     email.load_template('order_invoice.html')
 
     for order in json_list:
         html = email.render_template(order)
+        email_address = order["order"]["Account"]["email"]
+        email_subject = 'Noshgrab Order: ' + order["order"]["id"]
         if CONFIG.version == "DEVELOPMENT":
-            
-            print(json.dumps(order, indent=3))
+            '''
+            I had to set enviroment variables with AWS Keys for below to work.
+            No hardcode.
 
+            Because Sandbox only allows verified emails as senders/recipients we check to ensure 
+            correct order+email pairing by placing the email_subject and email_adress 
+            in the same string which is passed as the email subject line.
+            This ensures we are sending the right order to the right email
+            '''
+            # email.send(email_subject + email_address, 'dev.hmsk@gmail.com')
+            
             with open(f'{order["order"]["id"]}_invoice.html', 'w') as f:
                 f.write(html)
-
-        # Uncomment to test emailing
-        # if order['order']['id'] == "TABsvHlgeYGEVx1JKa0aVE4OBBGZY-1":
-        #     email.send(f'NoshGrab Catering Order #{order["order"]["id"]}')
-
+        
+        # Uncomment below for Production usage:
         elif CONFIG.version == "PRODUCTION":
-            if order['order']['id'] == "TABsvHlgeYGEVx1JKa0aVE4OBBGZY-1":
-                email.send(f'NoshGrab Catering Order #{order["order"]["id"]}')
+            email.send(email_subject, email_address)
 
 def parse_order(order):
     account_dict = {}
-    
     for item in order.items:
         if item.account_id not in account_dict:
             account_dict[item.account_id] = [item]
@@ -107,10 +117,10 @@ def parse_order(order):
         
         created_at = order.created_at
         updated_at = order.updated_at
-        
+        pickup_at = order.pickup_at
         # create new object for email use
         order_object_to_email = Order(order_id, account_id, OrderState.OPEN, subtotal, taxes,
-                                    created_at, updated_at, items, parent_id)
+                                    created_at, updated_at, pickup_at, items, parent_id)
         order_list.append(order_object_to_email)
 
     return order_list
@@ -129,7 +139,10 @@ def create_json_email(account_dict, sub_order):
                             "taxes": sub_order.taxes,
                             "sub_total": sub_order.subtotal,
                             "service_fee": sub_order.subtotal * CONFIG.info['invoice_percentage']['service_fee'],
-                            "credit_card_fee": (sub_order.subtotal + sub_order.taxes) * CONFIG.info['invoice_percentage']['credit_fee']}}
+                            "credit_card_fee": (sub_order.subtotal + sub_order.taxes) * CONFIG.info['invoice_percentage']['credit_fee'],
+                            "created_at": sub_order.created_at,
+                            "updated_at": sub_order.updated_at,
+                            "pickup_at": sub_order.pickup_at}}
 
     return json_email_dict
 
@@ -140,5 +153,9 @@ def hello_world():
 
 if __name__ == "__main__":
     with app.app_context():
-        main()
-        app.run()
+        while START == 1:
+            print("running main")
+            main()
+            print("sleep 3")
+            time.sleep(3)
+
