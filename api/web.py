@@ -102,7 +102,6 @@ class Square:
         # pretty = json.dumps(orders, indent=4)
         # print(pretty)
         for order in orders:
-            # print(order)
             order_id = order['id']
             account_id = order['location_id']
 
