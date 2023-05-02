@@ -1,4 +1,5 @@
 import time
+import pprint
 import os
 from api.web import Square
 from database.model import db, Order, OrderState
@@ -77,19 +78,17 @@ def main():
         if CONFIG.version == "DEVELOPMENT":
             '''
             I had to set enviroment variables with AWS Keys for below to work.
-            No hardcode.
-
             Because Sandbox only allows verified emails as senders/recipients we check to ensure 
             correct order+email pairing by placing the email_subject and email_adress 
             in the same string which is passed as the email subject line.
             This ensures we are sending the right order to the right email
             '''
-            # email.send(email_subject + email_address, 'dev.hmsk@gmail.com')
+            email.send(email_subject + email_address, 'dev.hmsk@gmail.com')
             
             with open(f'{order["order"]["id"]}_invoice.html', 'w') as f:
                 f.write(html)
         
-        # Uncomment below for Production usage:
+        # Uncomment below for Production usage
         elif CONFIG.version == "PRODUCTION":
             email.send(email_subject, email_address)
 

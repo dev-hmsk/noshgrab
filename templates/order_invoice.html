@@ -175,12 +175,14 @@
                 <h3>Order Confirmation:</h3>
             </div>
             <div class="flex-child">
-                <a class="button accept" href="http://127.0.01:5000/">ACCEPT</a>
+                <form>
+                    <a class="button accept" href="mailto:dev.hmsk@gmail.com?subject=Order%20Recieved%20#{{order.id}}&body=Please%20add%20any%20additional%20comments%20here:">ACCEPT</a>
+                </form> 
             </div>
             <div class="flex-child">
                 <form>
-                    <a class="button decline" href="http://127.0.01:5000/">DECLINE</a>
-                </form>
+                    <a class="button decline" href="mailto:dev.hmsk@gmail.com?subject=Order%20Declined%20#{{order.id}}&body=Please%20add%20any%20additional%20comments%20here:">DECLINE</a>
+                </form> 
             </div>
         </div>
     </body>
