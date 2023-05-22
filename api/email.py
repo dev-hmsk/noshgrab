@@ -1,19 +1,17 @@
-
 import boto3
 from botocore.exceptions import ClientError
 from jinja2 import Environment, FileSystemLoader
 
-
 # boto3.set_stream_logger('botocore', level='DEBUG')
 
 class ASes:
-    def __init__(self, config):
+    def __init__(self, config, templates_folder='templates'):
         self.sender = config['sender']
         # removed this to instead pass in email_address as arguement from order["order"]["Account"]["email"] in app.py
         # self.recipents = config['recipients']
         self.aws_region = config['aws_region']
         self.charset = config['charset']
-        self.template_env = Environment(loader=FileSystemLoader('templates'))
+        self.template_env = Environment(loader=FileSystemLoader(templates_folder))
         self.client = boto3.client('ses',region_name=config['aws_region'])
         self.template = None
         self._rendered_template = ''

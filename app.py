@@ -1,5 +1,4 @@
 import time
-import pprint
 import os
 from api.web import Square
 from database.model import db, Order, OrderState
@@ -18,28 +17,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'{db_config["dialect"]}://{db_config["u
 
 db.init_app(app)
 
-START = 1
+START = True
 
 def main():
     web_s = Square()
     database = NoshGrab(db)
+    # Modify os.environ to instead be secret key TOKEN from vault server
     web_s.connect(os.environ['TOKEN'], environment=CONFIG.info['square']['environment'])
-
-    '''
-    For testing purposes: Drop and then Create all database tables.
-
-    The below logic assumes that as new orders come in we will check against the database,
-    add the order if not present in database, then check OrderState.
-    If OPEN we parse_order(order). This is then appended to an order_list[].
-    Then for every order in the order_list, we loop for every sub_order,
-    and add them as novel orders to the database.print(item.id, item.name, item.quantity)
-    We then run create_json_email() and pass in the iterated sub_order
-    with the account_list given to us by web_s.get_accounts().
-
-    This will allow us to create a novel JSON for every sub_order 
-    which will have the relevant info needed to send out 
-    an automated email to the apprioriate account
-    '''
     orders = web_s.get_orders()
     db_orders = database.get.orders()
     account_list = web_s.get_accounts()
@@ -68,7 +52,7 @@ def main():
                 database.add(sub_order)
                 json_list.append(create_json_email(account_dict, sub_order))
     
-    email = ASes(CONFIG.info['email'])
+    email = ASes(CONFIG.info['email'], os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates'))
     email.load_template('order_invoice.html')
 
     for order in json_list:
@@ -76,19 +60,13 @@ def main():
         email_address = order["order"]["Account"]["email"]
         email_subject = 'Noshgrab Order: ' + order["order"]["id"]
         if CONFIG.version == "DEVELOPMENT":
-            '''
-            I had to set enviroment variables with AWS Keys for below to work.
-            Because Sandbox only allows verified emails as senders/recipients we check to ensure 
-            correct order+email pairing by placing the email_subject and email_adress 
-            in the same string which is passed as the email subject line.
-            This ensures we are sending the right order to the right email
-            '''
+
             email.send(email_subject + email_address, 'dev.hmsk@gmail.com')
             
             with open(f'{order["order"]["id"]}_invoice.html', 'w') as f:
                 f.write(html)
         
-        # Uncomment below for Production usage
+        # Production usage
         elif CONFIG.version == "PRODUCTION":
             email.send(email_subject, email_address)
 
@@ -119,7 +97,7 @@ def parse_order(order):
         pickup_at = order.pickup_at
         # create new object for email use
         order_object_to_email = Order(order_id, account_id, OrderState.OPEN, subtotal, taxes,
-                                    created_at, updated_at, pickup_at, items, parent_id)
+                                      created_at, updated_at, pickup_at, items, parent_id)
         order_list.append(order_object_to_email)
 
     return order_list
@@ -145,16 +123,10 @@ def create_json_email(account_dict, sub_order):
 
     return json_email_dict
 
-@app.route('/')
-# ‘/’ URL is bound with hello_world() function.
-def hello_world():
-    return 'Hello World'
-
 if __name__ == "__main__":
     with app.app_context():
-        while START == 1:
+        while START == True:
             print("running main")
             main()
-            print("sleep 3")
-            time.sleep(3)
-
+            print("sleep 5")
+            time.sleep(5)

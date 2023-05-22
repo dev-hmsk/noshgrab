@@ -2,7 +2,8 @@ from square.client import Client
 from database.model import Account, Item, Order
 from config.config import CONFIG
 from database.model import OrderState
-import json
+
+
 class Square:
     def __init__(self):
         self.client = None
@@ -99,13 +100,11 @@ class Square:
         
         orders = result.body['orders']
         order_object_list = []
-        # pretty = json.dumps(orders, indent=4)
-        # print(pretty)
+
         for order in orders:
             order_id = order['id']
             account_id = order['location_id']
 
-            # Order state is set as an Enum. So we have to convert to Enum here
             state_enum = OrderState(order['state'])
             
             order_taxes = order['net_amounts']['tax_money']['amount']
