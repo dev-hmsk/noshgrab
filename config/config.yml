@@ -8,7 +8,7 @@ default: &default
     ip: 172.17.0.2
     port: 5432
   
-  # Square API Configurations
+  # Square API Configurations 
   square:
     environment: sandbox
   

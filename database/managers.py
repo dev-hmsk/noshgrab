@@ -51,7 +51,6 @@ class NoshGrab:
         # Return account based on account id
         @_select_id_compare(Account)
         def account(self, _id):
-            print("step in check")
             results = self.execute(self.select(Account).filter_by(id = _id)).scalars().first()
             return results
                     

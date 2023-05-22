@@ -1,0 +1,16 @@
+[Unit]
+Description=Noshgrab Service
+After=network-online.target vault.service
+Wants=network-online.target
+Requires=vault.service
+
+[Service]
+Type=simple
+User=ubuntu
+ExecStart=/bin/bash /home/ubuntu/noshgrab/scripts/noshgrab/noshgrab_script.sh 
+Restart=on-failure
+ExecReload=/bin/kill -HUP $MAINPID
+KillSignal=SIGTERM
+
+[Install]
+WantedBy=multi-user.target
