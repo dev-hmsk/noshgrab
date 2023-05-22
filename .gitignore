@@ -8,5 +8,5 @@ vault/vault_data/sys
 vault/vault_data/logical
 vault/vault_data/core
 vault/vault_data/secret_key.yml
-config/config.yml
+/config/config.yml
 
