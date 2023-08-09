@@ -3,14 +3,15 @@
 NoshGrab is a web application designed to provide a seamless experience for food ordering and management. Built with Flask and backed by a PostgreSQL database, it offers robust features and integrations to ensure a smooth user experience.
 
 # Prerequisites
-Python 3.x
-Docker
-PostgreSQL
-AWS Credentials (for certain setup scripts)
-Vault (for secret management)
+- Python 3.x
+- Docker
+- PostgreSQL
+- AWS Credentials (for AWS EC2 Hosting)
+- Vault (for secret management)
 
 # Installation & Setup
 Clone the Repository:
+
 git clone https://github.com/dev-hmsk/noshgrab.git
 cd noshgrab
 
